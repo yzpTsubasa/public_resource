@@ -1,0 +1,754 @@
+{
+    "$id": "http://localhost:8686/api/public/schema/automator.schema.json",
+    "$schema": "https://json-schema.org/draft-04/schema",
+    "title": "Automator",
+    "description": "Automator config by TsubasaYeung",
+    "type": "array",
+    "items": {"$ref": "#/definitions/command"},
+    "definitions": {
+        "common_data": {
+            "properties": {
+                "commands": {
+                    "title": "命令集",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/command"}
+                },
+                "force": {"title": "强制执行"},
+                "full_match": {"title": "保留完整匹配对象"},
+                "flags": {"title": "flags"},
+                "struct": {"title": "匹配结果的结构"},
+                "options": {
+                    "title": "额外选项",
+                    "type": "object",
+                    "properties": {
+                        "indent": {"title": "缩进", "default": 2},
+                        "encoding": {"title": "编码方式", "default": null, "enum": [null, "ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "latin1", "binary", "hex"]},
+                        "auto_encoding":{"title": "自动检查编码", "default": true},
+                        "rename": {
+                            "anyOf": [
+                                {"title": "新文件名", "type": "string"},
+                                {
+                                    "type": "object",
+                                    "title": "重命名",
+                                    "properties": {
+                                        "base_trim_left": {"title": "修剪文件名左侧"},
+                                        "base_trim_right": {"title": "修剪文件名右侧"},
+                                        "dir_trim_left": {"title": "修剪路径左侧"},
+                                        "dir_trim_right": {"title": "修剪路径右侧"},
+                                        "dir_prefix": {"title": "添加路径前缀"},
+                                        "dir_suffix": {"title": "添加路径后缀"},
+                                        "base_prefix": {"title": "添加文件名前缀"},
+                                        "base_suffix": {"title": "添加文件名后缀"}
+                                    }
+                                }
+                            ]
+                        },
+                        "overwrite": {"title": "强制覆盖"},
+                        "strategy": {"title": "策略", "enum": ["lazy", "hash", "force"]},
+                        "strip_comments": {"title": "去除注释"}
+                    }
+                },
+                "type": {"title": "类型"},
+                "pattern": {"title": "正则表达式"},
+                "cwd": {"title": "执行目录"},
+                "content": {"title": "来源内容"},
+                "content_print": {"title": "来源内容打印", "default": true},
+                "content_confirm": {"title": "来源内容确认", "default": true},
+                "parse_type": {"title": "结果值解析类型"},
+                "value_type": {"title": "结果值转换类型"},
+                "flatten": {"title": "数组扁平化", "type": "boolean", "default": true},
+                "remove_duplicate": {"title": "数组去重", "type": "boolean", "default": true},
+                "remove_duplicate_pattern": {"title": "数组去重正则表达式"},
+                "remove_duplicate_prefix": {"title": "数组去重后添加前缀"},
+                "remove_duplicate_suffix": {"title": "数组去重后添加后缀"},
+                "store_trim": {"title": "字符串去除空白", "type": "boolean", "default": true},
+                "default_value": {"title": "默认结果值"},
+                "store_key_type": {"title": "结果值名称转换"},
+                "store_mode": {
+                    "title": "结果值保存模式",
+                    "enum": ["default", "push", "unshift", "append", "merge", "concat"]
+                },
+                "store_dst_type": {"title": "结果值保存类型"},
+                "reveal_dst": {"title": "显示结果值保存位置", "type": "boolean", "default": true},
+                "open_dst": {"title": "打开结果值保存位置", "type": "boolean", "default": true},
+                "mapping": {"title": "结果值解构映射保存", "default": true},
+                "store_clipboard": {"title": "结果值写入剪切板", "type": "boolean", "default": true},
+                "key": {"title": "来源值名称"},
+                "src": {"title": "来源地址"},
+                "base": {"title": "基础地址"},
+                "dst": {"title": "目标地址"},
+                "store_key": {"title": "结果值名称"},
+                "store_dst": {"title": "结果值保存位置"},
+                "store_print": {"title": "结果值打印", "default": true},
+                "store_stdout": {"title": "结果值写入标准输出stdout，需要配合启动参数 --LOG_LEVEL 99", "default": true},
+                "title": {"title": "标题x"},
+                "message": {"title": "消息内容"},
+                "connection": {"title": "连接对象"},
+                "query": {"title": "查询语句"},
+                "no_glob": {"title": "不使用glob", "default": true},
+                "only_file": {"title": "仅文件", "default": true},
+                "cache_key": {"title": "缓存键"},
+                "cache_type": {"title": "缓存类型", "enum": ["local", "svn", "simple_sqlite", "simple_svn", "simple_local"]},
+                "delimiter": {"title": "分隔符", "default": ","},
+                "props": {"title": "属性"},
+                "lifetime": {"title": "生命周期(ms)", "default": 5000},
+                "store_validator": { "title": "结果值校验", "default": "(ret) => [true, 'success']" },
+                "credential": { "title": "凭证", "type": "object", "properties": {
+                    "username":{ "title": "用户名", "type": "string" },
+                    "password": { "title": "密码", "type": "string" }
+                } },
+                "prompt": {"title": "提示语", "type": "string"},
+                "store_confirm": {"title": "结果值确认", "default": true}
+            }
+        },
+        "common_cfg": {
+            "properties": {
+                "show_progress": {"title": "显示进度", "type": "boolean"},
+                "ignore_error": {"title": "忽略错误", "type": "boolean"},
+                "when": {"title": "代码执行结果值为true时执行"},
+                "if_false": {"title": "结果值为false时执行"},
+                "if_true": {"title": "结果值为true时执行"},
+                "title": {"title": "标题"},
+                "newline": {"title": "强制另起一行"},
+                "log": {"title": "记录结果在日志中", "type": "boolean"},
+                "required": {"title": "结果不能为空", "type": "boolean"},
+                "retry": {"title": "重试次数", "type": "number"},
+                "automatic": {"type": "boolean", "title": "是否自动执行"}
+            }
+        },
+        "command": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "title": "命令类型",
+                            "enum": ["assemble", "disassemble", "read_cache", "write_cache", "stream", "ftp", "edit_excel", "write_excel", "read_only_excel", "mysql_connect", "mysql_end", "mysql_query", "write_query", "abort", "base", "confirm", "copy", "write_clipboard", "read_clipboard", "debugger", "exec_from_file", "files", "first_exist", "flatten", "git_commit", "git_export_diff_head", "git_is_dirty", "input", "list2dict", "loop", "loop_forever", "move", "modify", "open", "parse", "pause", "print", "read_cfg", "read_plain", "remove", "retrieve", "reveal", "storage", "store", "storage_optional", "store_optional", "svn_commit", "svn_is_dirty", "svn_update", "svn_export_diff_head", "test", "truncate", "truncate_all", "void", "write_cfg", "write_plain", "zip", "valid_required", "continue", "break", "stringify", "commit", "export_diff_head", "is_dirty", "move_local", "alert", "interval", "traversal", "notify", "log", "file_info", "read_excel", "ts_sort", "divination", "suan_gua", "file_size", "updating_revision", "revision_info", "unzip"]
+                        },
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {},
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "edit", "title": "编辑"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "actions": {"title": "操作集"}
+                            },
+                            "required": ["actions"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "dingtalk", "title": "使用机器人向钉钉群发送通知"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "webhook": {"title": "webhook地址"},
+                                "msgtype": {"title": "消息类型", "enum": ["text", "markdown", "actionCard", "feedCard"]},
+                                "title": {"title": "消息标题"},
+                                "content": {"title": "消息内容"},
+                                "atMobiles": {"title": "被@人的手机号", "type": "array"},
+                                "atUserIds": {"title": "被@人的用户userid", "type": "array"},
+                                "isAtAll": {"title": "@所有人是true，否则为false", "type": "boolean"},
+                                "secret": { "title": "加签" },
+                                "btns": { "title": "按钮", "type":"array", "items": {
+                                    "properties": {
+                                        "title": { "title": "标题" },
+                                        "url": { "title": "链接地址" },
+                                        "image": { "title": "图片地址" }
+                                    }
+                                } }
+                            },
+                            "required": [ "webhook", "msgtype" ],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "schedule", "title": "定时任务"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "schedule_type": {
+                                    "title": "定时类型",
+                                    "enum": ["delay", "date"]
+                                },
+                                "value": {"title": "值"}
+                            },
+                            "required": ["schedule_type", "value"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "enum": ["http_request", "request", "download"],
+                            "title": "http请求/下载"
+                        },
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "target": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {"title": "请求地址"}
+                                    }
+                                },
+                                "src": {"title": "请求地址"},
+                                "enable_cache": {"title": "启用缓存(类型)"},
+                                "response_validator": {"title": "响应校验", "default": "(res) => [res.statusCode == 200, res.body]" },
+                                "response_type": { "title": "返回数据方式", "default": "DEFAULT", "enum": ["DEFAULT", "RAW", "HEADERS", "STATUS_CODE", "BODY"] },
+                                "options": {
+                                    "type": "object",
+                                    "properties": {
+                                        "method": {"title": "方式", "enum": ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]},
+                                        "headers": {"title": "头部", "properties": {
+                                            "Authorization": { "title": "授权密钥" }
+                                        }},
+                                        "proxy": { "title": "代理", "default": "http://127.0.0.1:1080" },
+                                        "body": { "title": "携带的字符串或者二进制数据", "default": "" },
+                                        "json": { "title": "json对象数据", "type": "object"},
+                                        "formData": { "title": "表单数据", "properties": {
+                                            "file": { "title": "文件" , "properties": {
+                                                "value": { "title": "二进制数据" },
+                                                "options": { "title": "文件选项" , "properties": {
+                                                    "filename":{ "title": "文件名" }
+                                                }}
+                                            }}
+                                        }}
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "enum": ["select", "multi_select"],
+                            "title": "选择"
+                        },
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "key_filter_pattern": {"title": "键过滤模式"},
+                                "value_filter_pattern": {"title": "值过滤模式"},
+                                "preview": {"title": "预览"},
+                                "recommend_eval": {"title": "建议值-运行代码"},
+                                "recommend": {
+                                    "enum": ["first", "last", "middle", "random"],
+                                    "title": "建议类型"
+                                },
+                                "recommend_context": {"title": "建议值模式依据的内容"},
+                                "recommend_pattern": {"title": "建议值模式"},
+                                "recommend_only_key": {"title": "建议值只判断键"},
+                                "select_mode": {
+                                    "title": "选择模式",
+                                    "enum": ["key", "value", "index", "all"]
+                                }
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "switch", "title": "选择要执行的命令"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "commands_cfgs": {"title": "命令配置集", "type": "array", "items": {
+                                    "type": "object",
+                                    "title": "命令配置",
+                                    "properties": {
+                                        "title": { "title": "命令标题" },
+                                        "commands":{ 
+                                            "title": "命令集",
+                                            "type": "array",
+                                            "items": {"$ref": "#/definitions/command"}
+                                        }
+                                    },
+                                    "required": ["title", "commands"]
+                                }}
+                            },
+                            "required": ["commands_cfgs"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "eval", "title": "运行代码"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "code": {"title": "代码"}
+                            },
+                            "required": ["code"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "temp", "title": "获取临时文件名"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "change_filter", "title": "变更过滤"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "key_name": {"title": "唯一标识的名称", "type": "string"},
+                                "status_name": {"title": "状态值的名称", "type": "string"},
+                                "default_status": {"title": "默认正确的状态值"}
+                            },
+                            "required": ["key_name", "status_name", "cache_key"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "translate", "title": "翻译"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "from": {"title": "来源语言", "default": "auto", "enum": ["auto", "ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]},
+                                "to": {"title": "目标语言", "default": "zh", "enum": ["ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]}
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "interval", "title": "间隔时间任务"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "delay": {"title": "延时(毫秒)"},
+                                "repeat": {"title": "总重复次数"},
+                                "repeat_mapping": {"title": "总重复次数保存名称"},
+                                "times_mapping": {"title": "已重复次数保存名称"}
+                            },
+                            "required": ["delay"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "web_socket", "title": "连接websocket"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "url": {"title": "连接地址", "default": "ws://"},
+                                "name": {"title": "连接名称", "default": ""},
+                                "timeout": {"title": "连接超时(ms)", "default": 5000 },
+                                "quiet": {"title": "安静模式", "default": true },
+                                "protocols": {"title": "协议"},
+                                "little_endian": {"title": "最低有效字节位于最前(小端)", "default": true },
+                                "headers": {"title": "头部解析"},
+                                "body_retrieval": {"title": "包体类型拼接"},
+                                "bodies": {"title": "包体解析"},
+                                "sends": {"title": "连接成功后发送"},
+                                "options": { 
+                                    "type": "object", 
+                                    "title": "额外选项",
+                                    "properties": {
+                                        "rejectUnauthorized":{ "title": "拒绝未授权证书", "default": true }
+                                    }
+                                }
+                            },
+                            "required": ["url"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "enum": ["exec_shell", "shell"],
+                            "title": "执行命令行"
+                        },
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "trim": {"title": "裁剪输出结果"},
+                                "capture_stdout": {"title": "捕获输出", "default": true },
+                                "instant_stdout": {"title": "即时打印输出，需配合 capture_stdout", "default": true },
+                                "ignore_code": {"title": "忽略错误码", "default": true },
+                                "inputs": {"title": "输入"},
+                                "encoding": {"title": "编码"},
+                                "shell": {"title": "shell模式执行"},
+                                "cmd": {"title": "命令行"}
+                            },
+                            "required": ["cmd"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "which", "title": "本机可执行文件"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "target": {"title": "目标文件名"}
+                            },
+                            "required": ["target"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "merge_files", "title": "合并多个文件"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "required": ["src", "base", "dst"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "date", "title": "日期"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "format": {"title": "格式化模板"},
+                                "date": {"title": "日期"},
+                                "offset": {"title": "日期偏移"}
+                            },
+                            "required": ["format"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "loop", "title": "循环"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "tip_key": {"title": "提示键", "default": true},
+                                "value_mapping": {"title": "循环值映射"},
+                                "key_mapping": {"title": "循环键映射"},
+                                "index_mapping": {"title": "循环索引映射"}
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "watch_mail", "title": "监听邮件"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "user": {"title": "用户名", "default": "foobar@outlook.com"},
+                                "password": {"title": "密码", "default": "***"},
+                                "host": {"title": "服务器名称", "default": "outlook.office365.com"},
+                                "port": {"title": "端口", "default": 993},
+                                "tls": {"title": "启用ssl安全链接", "default": true},
+                                "search": {"title": "邮件数据映射", "default": [ "UNSEEN" ] },
+                                "value_mapping": {"title": "邮件数据映射", "default": "mail_data" }
+                            },
+                            "required": [ "user", "password", "host" ],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "loop_forever", "title": "无限循环"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {},
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "cheerio", "title": "解析html得到cheerio对象"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {},
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "sleep", "title": "睡眠"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "timeout": {"title": "延时(ms)", "default": 3000, "type":"integer"}
+                            },
+                            "required": ["timeout"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "hash", "title": "散列值"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "digestEncoding": {
+                                    "title": "二进制摘要的文本编码",
+                                    "enum": ["base64", "hex"]
+                                },
+                                "algorithm": {
+                                    "title": "算法",
+                                    "enum": ["blake2b512", "blake2s256", "md4", "md5", "md5-sha1", "mdc2", "ripemd160", "rsa-sha1", "sha1", "sha224", "sha256", "sha3-224", "sha3-256", "sha3-384", "sha3-512", "sha384", "sha512", "sha512-224", "sha512-256", "shake128", "shake256", "sm3", "whirlpool"]
+                                }
+                            },
+                            "required": ["digestEncoding", "algorithm"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "tencent_cos", "title": "腾讯云"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "config": {
+                                    "type": "object",
+                                    "title": "腾讯云配置",
+                                    "properties": {
+                                        "secret_id": {
+                                            "type": "string",
+                                            "title": "秘钥ID"
+                                        },
+                                        "secret_key": {
+                                            "type": "string",
+                                            "title": "秘钥键"
+                                        },
+                                        "bucket": {
+                                            "type": "string",
+                                            "title": "仓库"
+                                        },
+                                        "appid": {
+                                            "type": "string",
+                                            "title": "产品id"
+                                        },
+                                        "region": {
+                                            "type": "string",
+                                            "title": "区域"
+                                        }
+                                    },
+                                    "required": [ "secret_id","secret_key","bucket","appid","region" ]
+                                },
+                                "mode": {
+                                    "title": "模式",
+                                    "enum": ["VIEW", "DOWNLOAD", "UPLOAD_FILE", "UPLOAD", "UPLOAD_FILES"]
+                                }
+                            },
+                            "required": ["config", "mode"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "string",
+                    "title": "命令类型",
+                    "enum": ["abort", "base", "confirm", "copy", "write_clipboard", "read_clipboard", "date", "debugger", "eval", "exec_from_file", "exec_shell", "files", "first_exist", "flatten", "git_commit", "git_export_diff_head", "git_is_dirty", "http_request", "input", "list2dict", "loop", "loop_forever", "move", "multi_select", "modify", "open", "parse", "pause", "print", "read_cfg", "read_plain", "remove", "request", "retrieve", "reveal", "select", "shell", "storage", "store", "storage_optional", "store_optional", "svn_is_dirty", "svn_update", "svn_export_diff_head", "test", "truncate", "truncate_all", "void", "write_cfg", "write_plain", "zip", "valid_required", "continue", "break", "stringify", "commit", "export_diff_head", "is_dirty", "which", "move_local", "edit", "schedule", "alert", "interval", "traversal", "notify", "log", "file_info", "read_excel", "ts_sort", "divination", "suan_gua", "file_size", "hash"]
+                }
+            ]
+        }
+    }
+}
