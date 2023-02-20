@@ -1,0 +1,479 @@
+{
+  "$id": "https://tsubasaohzora.coding.net/p/notes/d/learning_notes/git/raw/master/schema/skillevent.schema.json?download=false",
+  "$schema": "https://json-schema.org/draft-04/schema",
+  "title": "SkillEvent",
+  "description": "skillevent.json",
+  "type": "object",
+  "properties": {
+    "skillevent": {
+      "type": "array",
+      "title": "技能事件",
+      "items": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "战前跑位", "const": 1},
+              {"title": "攻击距离", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "设置动作", "const": 2},
+              {
+                "title": "动作名字",
+                "type": "string",
+                "enum": ["attack", "die", "run", "stand", "hit"]
+              },
+              {"title": "播放次数(不能为-1，最大999)", "type": "number", "multipleOf": 1, "minimum": 0, "exclusiveMinimum": true}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "受击事件", "const": 3},
+              {"title": "伤害占比（0-100）", "type": "number", "minimum": 0, "maximum": 100},
+              {"title": "受击类型", "type": "number"},
+              {"title": "受击光效", "type": "string"},
+              {"title": "光效播放次数", "type": "number"},
+              {"title": "光效缩放", "type": "number"},
+              {"title": "光效在角色的位置（脚底0-头顶1.0）", "type": "number"},
+              {"title": "是否随机旋转"},
+              {"title": "是否跟随"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "地图光效", "const": 4},
+              {"title": "光效名", "type": "string"},
+              {"title": "播放次数", "type": "number"},
+              {
+                "title": "己方0或敌方1",
+                "type": "number",
+                "enum": [0, 1]
+              },
+              {"title": "缩放值", "type": "number"},
+              {"title": "是否随机旋转"},
+              {"title": "是否是前景光效"},
+              {"title": "x偏移", "type": "number"},
+              {"title": "y偏移", "type": "number"},
+              {
+                "title": "2: xy镜像 1:x镜像 0:不做镜像",
+                "type": "number",
+                "enum": [0, 1, 2]
+              },
+              {"title": "淡入淡出参数[0: 淡入透明度，1: 保持透明度，2: 淡出透明度，3: 淡入时间(ms)，4: 保持时间(ms)，5:淡出时间(ms)]", "type": "array"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "击退", "const": 5},
+              {"title": "击退距离", "type": "number"},
+              {"title": "击退时长(ms)", "type": "number"},
+              {"title": "停留时长(ms)", "type": "number"},
+              {"title": "归位时长(ms)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "角色光效", "const": 6},
+              {
+                "anyOf": [
+                  {"title": "光效名", "type": "string"},
+                  {
+                    "title": "光效名数组",
+                    "type": "array",
+                    "items": {"type": "string", "title": "光效名"}
+                  }
+                ]
+              },
+              {"title": "播放次数", "type": "number"},
+              {
+                "title": "自己0或目标1",
+                "type": "number",
+                "enum": [0, 1]
+              },
+              {"title": "缩放值", "type": "number"},
+              {"title": "是否随机旋转"},
+              {"title": "-1 背景， 0同层级，1 前景"},
+              {"title": "光效在角色的位置（脚底0-头顶1.0）", "type": "number"},
+              {"title": "朝上时的x偏移", "type": "number"},
+              {"title": "朝上时y偏移", "type": "number"},
+              {"title": "朝下时的x偏移", "type": "number"},
+              {"title": "朝下时的y偏移", "type": "number"},
+              {"title": "是否跟随"},
+              {"title": "2: xy镜像 1:x镜像 0:不做镜像", "type": "number"},
+              {"title": "标准宽度。如果配置非0，则光效会根据这个值进行缩放", "type": "number"},
+              {"title": "淡入淡出参数[0: 淡入透明度，1: 保持透明度，2: 淡出透明度，3: 淡入时间(ms)，4: 保持时间(ms)，5:淡出时间(ms)]", "type": "array"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "飞箭", "const": 7},
+              {"title": "伤害占比（0-100）", "type": "number", "minimum": 0, "maximum": 100, "multipleOf": 1},
+              {"title": "飞箭资源", "type": "string"},
+              {"title": "缩放值", "type": "number"},
+              {"title": "初始在角色的位置（脚底0-头顶1.0）", "type": "number", "minimum": 0, "maximum": 1},
+              {"title": "速度倍速", "type": "number"},
+              {"title": "朝上时的x偏移", "type": "number"},
+              {"title": "朝上时y偏移", "type": "number"},
+              {"title": "朝下时的x偏移", "type": "number"},
+              {"title": "朝下时的y偏移", "type": "number"},
+              {"title": "目标朝上时x偏移", "type": "number"},
+              {"title": "目标朝上时y偏移", "type": "number"},
+              {"title": "目标朝下时x偏移", "type": "number"},
+              {"title": "目标朝下时y偏移", "type": "number"},
+              {"title": "延迟发射时间", "type": "number"},
+              {"title": "延迟受击时间", "type": "number"},
+              {
+                "title": "飞箭类型(0普通，1连接光效)",
+                "type": "number",
+                "enum": [0, 1]
+              }
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "震屏", "const": 8},
+              {"title": "x振幅", "type": "number"},
+              {"title": "y振幅", "type": "number"},
+              {"title": "周期(ms)", "type": "number"},
+              {"title": "时长(ms)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "空白事件", "const": 9},
+              {"title": "枚举常亮(0: 无, 1: 结束表现, 2: 复活逻辑处理)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "屏幕外飞入物品", "const": 10},
+              {"title": "伤害占比（0-100）", "type": "number"},
+              {"title": "己方0或敌方1", "type": "number"},
+              {"title": "物品标识", "type": "string"},
+              {"title": "x偏移", "type": "number"},
+              {"title": "y偏移", "type": "number"},
+              {"title": "缩放值", "type": "number"},
+              {"title": "用时", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "淡入淡出", "const": 11},
+              {"title": "初始透明度", "type": "number", "minimum": 0, "maximum": 1},
+              {"title": "最终透明度", "type": "number", "minimum": 0, "maximum": 1},
+              {"title": "时长(ms)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "归位", "const": 12},
+              {"title": "是否做跑步动作"},
+              {"title": "速度倍率", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "旋转", "const": 13},
+              {"title": "旋转的总圈数", "type": "number"},
+              {"title": "旋转的总时间(ms)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "击飞", "const": 14},
+              {"title": "飞行速度", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "缩放", "const": 15},
+              {"title": "起始缩放值", "type": "number"},
+              {"title": "目标缩放值", "type": "number"},
+              {"title": "变化时间(ms)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "法球", "const": 16},
+              {"title": "伤害占比（0-100）", "type": "number"},
+              {"title": "飞箭标识", "type": "string"},
+              {"title": "缩放值", "type": "number"},
+              {"title": "初始在角色的位置（脚底0-头顶1.0）", "type": "number"},
+              {"title": "速度倍速", "type": "number"},
+              {"title": "贝塞尔偏幅(正右负左)", "type": "number"},
+              {"title": "最高点位置（0-1）", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "分身", "const": 17},
+              {"title": "分身的位移速度倍速", "type": "number"},
+              {"title": "分身透明值", "type": "number"},
+              {"title": "分身技能表现ID", "type": "number"},
+              {"title": "产生分身的间隔", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "拖尾", "const": 18},
+              {"title": "透明值", "type": "number"},
+              {"title": "总时间", "type": "number"},
+              {"title": "间隔时间", "type": "number"},
+              {"title": "保留时间", "type": "number"},
+              {"title": "淡出时间", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "战前曲线跑位", "const": 19},
+              {"title": "攻击距离", "type": "number"},
+              {"title": "最高点位置（0-1）", "type": "number"},
+              {"title": "贝塞尔偏幅(正右负左)", "type": "number"},
+              {"title": "速度", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "备战出战的跑位", "const": 20},
+              {"title": "速度倍率", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "战前走位", "const": 21},
+              {"title": "速度倍率", "type": "number"},
+              {"title": "往前跑的距离", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "受击事件", "const": 22},
+              {"title": "伤害占比（0-100）", "type": "number"},
+              {"title": "受击类型", "type": "number"},
+              {"title": "受击光效", "type": "string"},
+              {"title": "光效播放次数", "type": "number"},
+              {"title": "光效缩放", "type": "number"},
+              {"title": "光效在角色的位置（脚底0-头顶1.0）", "type": "number"},
+              {"title": "是否随机旋转"},
+              {"title": "是否跟随"},
+              {"title": "时间间隔", "type": "number"},
+              {"title": "是否逆序"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "击退", "const": 23},
+              {"title": "击退距离", "type": "number"},
+              {"title": "击退时长", "type": "number"},
+              {"title": "停留时长", "type": "number"},
+              {"title": "归位时长", "type": "number"},
+              {"title": "时间间隔", "type": "number"},
+              {"title": "是否逆序"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "角色光效", "const": 24},
+              {
+                "anyOf": [
+                  {"title": "光效名", "type": "string"},
+                  {
+                    "title": "光效名数组",
+                    "type": "array",
+                    "items": {"type": "string", "title": "光效名"}
+                  }
+                ]
+              },
+              {"title": "播放次数", "type": "number"},
+              {"title": "缩放值", "type": "number"},
+              {"title": "是否随机旋转"},
+              {"title": "是否是前景光效"},
+              {"title": "光效在角色的位置（脚底0-头顶1.0）", "type": "number"},
+              {"title": "朝上时的x偏移", "type": "number"},
+              {"title": "朝上时y偏移", "type": "number"},
+              {"title": "朝下时的x偏移", "type": "number"},
+              {"title": "朝下时的y偏移", "type": "number"},
+              {"title": "是否跟随"},
+              {"title": "时间间隔", "type": "number"},
+              {"title": "是否逆序"},
+              {"title": "标准宽度。如果配置非0，则光效会根据这个值进行缩放", "type": "number"},
+              {"title": "淡入淡出参数[0: 淡入透明度，1: 保持透明度，2: 淡出透明度，3: 淡入时间(ms)，4: 保持时间(ms)，5:淡出时间(ms)]", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "技能音效", "const": 25},
+              {"title": "音效资源名", "type": "string", "pattern": "\\w+_mp3"},
+              {"title": "音量大小(0-1]", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "颜色事件", "const": 26},
+              {"title": "颜色[#000000-#ffffff]", "type": "string", "pattern": "#[0-9a-fA-F]{6}"},
+              {"title": "透明度[0, 1]", "type": "number"},
+              {"title": "时长", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "遮罩事件", "const": 27},
+              {"title": "遮罩区域x", "type": "number"},
+              {"title": "遮罩区域y", "type": "number"},
+              {"title": "遮罩区域width", "type": "number"},
+              {"title": "遮罩区域height", "type": "number"},
+              {"title": "角色初始x", "type": "number"},
+              {"title": "角色初始y", "type": "number"},
+              {"title": "角色结束x", "type": "number"},
+              {"title": "角色结束y", "type": "number"},
+              {"title": "是否为进入显示(true|false)"},
+              {"title": "时长", "type": "number"},
+              {"title": "延时", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "灰色事件", "const": 28},
+              {"title": "灰色[#000000-#ffffff]", "type": "string", "pattern": "#[0-9a-fA-F]{6}"},
+              {"title": "透明度[0, 1]", "type": "number"},
+              {"title": "时长", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "神王技喊话事件", "const": 29},
+              {"title": "技能类型", "type": "number"},
+              {"title": "时长（毫秒）", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "皮肤技喊话事件", "const": 30},
+              {"title": "技能类型", "type": "number"},
+              {"title": "时长（毫秒）", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "由buff触发的缩放(与类型15类似)", "const": 31},
+              {"title": "起始缩放值", "type": "number"},
+              {"title": "目标缩放值", "type": "number"},
+              {"title": "变化时间", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "模型修改", "const": 32},
+              {"title": "时装ID(dress_info.json)", "type": "number"},
+              {"title": "添加或者移除(0：移除[如果时装ID也为0，则移除所有时装]，1:添加）", "type": "number"},
+              {"title": "保留坐骑(0: 不保留，1：保留)", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "战前曲线跑位xy", "const": 33},
+              {"title": "攻击距离x", "type": "number"},
+              {"title": "攻击距离y", "type": "number"},
+              {"title": "最高点位置（0-1）", "type": "number"},
+              {"title": "贝塞尔偏幅(正右负左)", "type": "number"},
+              {"title": "速度", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "战前曲线走位", "const": 39},
+              {"title": "时间", "type": "number"},
+              {"title": "最高点x位置(0-1)", "type": "number"},
+              {"title": "最高点相对起点y轴偏移", "type": "number"},
+              {"title": "英雄阵营x坐标(相对720)", "type": "number"},
+              {"title": "英雄阵营y坐标-相对1280", "type": "number"},
+              {"title": "敌方阵营x坐标(相对720)", "type": "number"},
+              {"title": "敌方阵营y坐标-相对1280", "type": "number"}
+            ]
+          },
+          {
+            "type": "array",
+            "items": [
+              {"$ref": "#/definitions/skillevent_id"},
+              {"title": "暂停待机动画", "const": 40},
+              {"title": "1：停止。0：恢复", "type": "number"}
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": ["skillevent"],
+  "definitions": {
+    "skillevent_id": {"title": "技能事件id", "type": "number"}
+  }
+}
