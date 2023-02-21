@@ -1,5 +1,5 @@
 {
-  "$id": "https://tsubasaohzora.coding.net/p/notes/d/learning_notes/git/raw/master/schema/skillevent.schema.json?download=false",
+  "$id": "https://gitee.com/TsubasaYeung/public_resource/raw/master/schemas/skillevent.schema.json",
   "$schema": "https://json-schema.org/draft-04/schema",
   "title": "SkillEvent",
   "description": "skillevent.json",

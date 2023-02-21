@@ -1,5 +1,5 @@
 {
-    "$id": "http://localhost:8686/api/public/schema/automator.schema.json",
+    "$id": "https://gitee.com/TsubasaYeung/public_resource/raw/master/schemas/automator.schema.json",
     "$schema": "https://json-schema.org/draft-04/schema",
     "title": "Automator",
     "description": "Automator config by TsubasaYeung",
