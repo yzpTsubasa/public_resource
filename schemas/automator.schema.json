@@ -103,6 +103,8 @@
         },
         "common_cfg": {
             "properties": {
+                "data_print": {"title": "打印完整data", "type": "boolean", "default": true},
+                "data_confirm": {"title": "确认完整data", "type": "boolean", "default": true },
                 "show_progress": {"title": "显示进度", "type": "boolean"},
                 "ignore_error": {"title": "忽略错误", "type": "boolean"},
                 "when": {"title": "代码执行结果值为true时执行"},
