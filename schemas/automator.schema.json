@@ -250,8 +250,9 @@
                                         "rejectUnauthorized":{ "title": "执行证书检查", "default": true },
                                         "proxy": { "title": "代理", "default": "http://127.0.0.1:1080" },
                                         "body": { "title": "携带的字符串或者二进制数据", "default": "" },
-                                        "json": { "title": "json对象数据", "type": "object"},
-                                        "formData": { "title": "表单数据", "properties": {
+                                        "json": { "title": "json对象数据(Content-Type: application/json)", "type": "object"},
+                                        "form": { "title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
+                                        "formData": { "title": "表单数据(Content-Type: multipart/form-data)", "properties": {
                                             "file": { "title": "文件" , "properties": {
                                                 "value": { "title": "二进制数据" },
                                                 "options": { "title": "文件选项" , "properties": {
