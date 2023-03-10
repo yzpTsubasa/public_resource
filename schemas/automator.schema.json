@@ -237,7 +237,7 @@
                                     }
                                 },
                                 "src": {"title": "请求地址"},
-                                "enable_cache": {"title": "启用缓存(类型)"},
+                                "enable_cache": {"title": "启用缓存", "type": "boolean", "default": true },
                                 "response_validator": {"title": "响应校验", "default": "(res) => [res.statusCode == 200, res.body]" },
                                 "response_type": { "title": "返回数据方式", "default": "DEFAULT", "enum": ["DEFAULT", "RAW", "HEADERS", "STATUS_CODE", "BODY"] },
                                 "options": {
