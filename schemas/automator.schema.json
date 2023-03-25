@@ -287,6 +287,7 @@
                                 "key_filter_pattern": {"title": "键过滤模式"},
                                 "value_filter_pattern": {"title": "值过滤模式"},
                                 "preview": {"title": "预览"},
+                                "preview_handler": {"title": "预览执行器", "default": "(val, idx, arr) => {\n    return this.PROCESS_PIPE(val, \"basename\");\n}"},
                                 "recommend_eval": {"title": "建议值-运行代码"},
                                 "recommend": {
                                     "enum": ["first", "last", "middle", "random"],
