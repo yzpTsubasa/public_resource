@@ -515,9 +515,9 @@
                                 "capture_stdout": {"title": "捕获输出", "default": true },
                                 "instant_stdout": {"title": "即时打印输出，需配合 capture_stdout", "default": true },
                                 "ignore_code": {"title": "忽略错误码", "default": true },
-                                "inputs": {"title": "输入"},
+                                "inputs": {"title": "输入", "default": []},
                                 "encoding": {"title": "编码"},
-                                "shell": {"title": "shell模式执行"},
+                                "shell": {"title": "shell模式执行", "default": true},
                                 "cmd": {"title": "命令行"}
                             },
                             "required": ["cmd"],
