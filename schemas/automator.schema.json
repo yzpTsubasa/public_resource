@@ -516,7 +516,7 @@
                                 "instant_stdout": {"title": "即时打印输出，需配合 capture_stdout", "default": true },
                                 "ignore_code": {"title": "忽略错误码", "default": true },
                                 "inputs": {"title": "输入", "default": []},
-                                "encoding": {"title": "编码"},
+                                "encoding": {"title": "编码", "enum": [null, "ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "latin1", "binary", "hex"]},
                                 "shell": {"title": "shell模式执行", "default": true},
                                 "cmd": {"title": "命令行"}
                             },
