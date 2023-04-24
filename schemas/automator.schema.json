@@ -384,7 +384,7 @@
                                     }
                                 }
                             },
-                            "required": ["code"],
+                            "required": ["commands", "hotkeys"],
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
                             ]
