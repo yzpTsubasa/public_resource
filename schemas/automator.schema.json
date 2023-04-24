@@ -365,6 +365,38 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "shortcut", "title": "设置快捷键"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "commands": {
+                                    "title": "命令集",
+                                    "type": "array",
+                                    "items": {"$ref": "#/definitions/command"}
+                                },
+                                "hotkeys": {
+                                    "title": "快捷键",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": ["CTRL", "ALT", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
+                                    }
+                                }
+                            },
+                            "required": ["code"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "divination", "title": "六十四卦"},
                         "data": {
                             "type": "object",
