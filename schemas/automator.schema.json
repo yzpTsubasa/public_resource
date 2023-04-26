@@ -22,8 +22,24 @@
                     "type": "object",
                     "properties": {
                         "indent": {"title": "缩进", "default": 2},
-                        "encoding": {"title": "编码方式", "default": null, "enum": [null, "ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "latin1", "binary", "hex"]},
-                        "auto_encoding":{"title": "自动检查编码", "default": true},
+                        "encoding": {
+                            "title": "编码方式",
+                            "default": null,
+                            "enum": [
+                                null,
+                                "ascii",
+                                "utf8",
+                                "utf-8",
+                                "utf16le",
+                                "ucs2",
+                                "ucs-2",
+                                "base64",
+                                "latin1",
+                                "binary",
+                                "hex"
+                            ]
+                        },
+                        "auto_encoding": {"title": "自动检查编码", "default": true},
                         "rename": {
                             "anyOf": [
                                 {"title": "新文件名", "type": "string"},
@@ -44,18 +60,30 @@
                             ]
                         },
                         "overwrite": {"title": "强制覆盖"},
-                        "strategy": {"title": "策略", "enum": ["lazy", "hash", "force"]},
+                        "strategy": {
+                            "title": "策略",
+                            "enum": ["lazy", "hash", "force"]
+                        },
                         "strip_comments": {"title": "去除注释"}
                     }
                 },
-                "type": {"title": "类型", "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence", "yml_compacted", "yaml_compacted", "json_compacted", "json_simple", "string"]},
+                "type": {
+                    "title": "类型",
+                    "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence", "yml_compacted", "yaml_compacted", "json_compacted", "json_simple", "string"]
+                },
                 "pattern": {"title": "正则表达式"},
                 "cwd": {"title": "执行目录"},
                 "content": {"title": "来源内容"},
                 "content_print": {"title": "来源内容打印", "default": true},
                 "content_confirm": {"title": "来源内容确认", "default": true},
-                "parse_type": {"title": "结果值解析类型", "enum": ["markdown_table_array","markdown_table","markdown_table_object","yml","yaml","json","xml","xml2json","xml2js","json2xml","js2xml","lua_assignment","lua","svn_diff","sequence"]},
-                "value_type": {"title": "结果值转换类型", "enum": ["int","integer","float","number","string","str","list","array","bool","boolean","millisecond"]},
+                "parse_type": {
+                    "title": "结果值解析类型",
+                    "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence"]
+                },
+                "value_type": {
+                    "title": "结果值转换类型",
+                    "enum": ["int", "integer", "float", "number", "string", "str", "list", "array", "bool", "boolean", "millisecond"]
+                },
                 "flatten": {"title": "数组扁平化", "type": "boolean", "default": true},
                 "remove_duplicate": {"title": "数组去重", "type": "boolean", "default": true},
                 "remove_duplicate_pattern": {"title": "数组去重正则表达式"},
@@ -88,15 +116,22 @@
                 "no_glob": {"title": "不使用glob", "default": true},
                 "only_file": {"title": "仅文件", "default": true},
                 "cache_key": {"title": "缓存键"},
-                "cache_type": {"title": "缓存类型", "enum": ["local", "svn", "simple_sqlite", "simple_svn", "simple_local"]},
+                "cache_type": {
+                    "title": "缓存类型",
+                    "enum": ["local", "svn", "simple_sqlite", "simple_svn", "simple_local"]
+                },
                 "delimiter": {"title": "分隔符", "default": ","},
                 "props": {"title": "属性"},
                 "lifetime": {"title": "生命周期(ms)", "default": 5000},
-                "store_validator": { "title": "结果值校验", "default": "(ret) => [true, 'success']" },
-                "credential": { "title": "凭证", "type": "object", "properties": {
-                    "username":{ "title": "用户名", "type": "string" },
-                    "password": { "title": "密码", "type": "string" }
-                } },
+                "store_validator": {"title": "结果值校验", "default": "(ret) => [true, 'success']"},
+                "credential": {
+                    "title": "凭证",
+                    "type": "object",
+                    "properties": {
+                        "username": {"title": "用户名", "type": "string"},
+                        "password": {"title": "密码", "type": "string"}
+                    }
+                },
                 "prompt": {"title": "提示语", "type": "string"},
                 "store_confirm": {"title": "结果值确认", "default": true}
             }
@@ -104,7 +139,7 @@
         "common_cfg": {
             "properties": {
                 "data_print": {"title": "打印完整data", "type": "boolean", "default": true},
-                "data_confirm": {"title": "确认完整data", "type": "boolean", "default": true },
+                "data_confirm": {"title": "确认完整data", "type": "boolean", "default": true},
                 "show_progress": {"title": "显示进度", "type": "boolean", "default": true},
                 "ignore_error": {"title": "忽略错误", "type": "boolean"},
                 "when": {"title": "代码执行结果值为true时执行"},
@@ -164,28 +199,65 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "zip_data", "title": "压缩数据"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "entries": {
+                                    "title": "入口集",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "path": {"title": "路径", "default": ""},
+                                            "content": {"title": "内容(string|buffer)" }
+                                        }
+                                    }
+                                }
+                            },
+                            "required": ["entries"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "dingtalk", "title": "使用机器人向钉钉群发送通知"},
                         "data": {
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
                                 "webhook": {"title": "webhook地址"},
-                                "msgtype": {"title": "消息类型", "enum": ["text", "markdown", "actionCard", "feedCard"]},
+                                "msgtype": {
+                                    "title": "消息类型",
+                                    "enum": ["text", "markdown", "actionCard", "feedCard"]
+                                },
                                 "title": {"title": "消息标题"},
                                 "content": {"title": "消息内容"},
                                 "atMobiles": {"title": "被@人的手机号", "type": "array"},
                                 "atUserIds": {"title": "被@人的用户userid", "type": "array"},
                                 "isAtAll": {"title": "@所有人是true，否则为false", "type": "boolean"},
-                                "secret": { "title": "加签" },
-                                "btns": { "title": "按钮", "type":"array", "items": {
-                                    "properties": {
-                                        "title": { "title": "标题" },
-                                        "url": { "title": "链接地址" },
-                                        "image": { "title": "图片地址" }
+                                "secret": {"title": "加签"},
+                                "btns": {
+                                    "title": "按钮",
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "title": {"title": "标题"},
+                                            "url": {"title": "链接地址"},
+                                            "image": {"title": "图片地址"}
+                                        }
                                     }
-                                } }
+                                }
                             },
-                            "required": [ "webhook", "msgtype" ],
+                            "required": ["webhook", "msgtype"],
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
                             ]
@@ -237,30 +309,49 @@
                                     }
                                 },
                                 "src": {"title": "请求地址"},
-                                "enable_cache": {"title": "启用缓存", "type": "boolean", "default": true },
-                                "response_validator": {"title": "响应校验", "default": "(res) => [res.statusCode == 200, res.body]" },
-                                "response_type": { "title": "返回数据方式", "default": "DEFAULT", "enum": ["DEFAULT", "RAW", "HEADERS", "STATUS_CODE", "BODY"] },
-                                "quiet": {"title": "安静模式", "default": true },
+                                "enable_cache": {"title": "启用缓存", "type": "boolean", "default": true},
+                                "response_validator": {"title": "响应校验", "default": "(res) => [res.statusCode == 200, res.body]"},
+                                "response_type": {
+                                    "title": "返回数据方式",
+                                    "default": "DEFAULT",
+                                    "enum": ["DEFAULT", "RAW", "HEADERS", "STATUS_CODE", "BODY"]
+                                },
+                                "quiet": {"title": "安静模式", "default": true},
                                 "options": {
                                     "type": "object",
                                     "properties": {
-                                        "method": {"title": "方式", "enum": ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]},
-                                        "headers": {"title": "头部", "properties": {
-                                            "Authorization": { "title": "授权密钥" }
-                                        }},
-                                        "rejectUnauthorized":{ "title": "执行证书检查", "default": true },
-                                        "proxy": { "title": "代理", "default": "http://127.0.0.1:1080" },
-                                        "body": { "title": "携带的字符串或者二进制数据", "default": "" },
-                                        "json": { "title": "json对象数据(Content-Type: application/json)", "type": "object"},
-                                        "form": { "title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
-                                        "formData": { "title": "表单数据(Content-Type: multipart/form-data)", "properties": {
-                                            "file": { "title": "文件" , "properties": {
-                                                "value": { "title": "二进制数据" },
-                                                "options": { "title": "文件选项" , "properties": {
-                                                    "filename":{ "title": "文件名" }
-                                                }}
-                                            }}
-                                        }}
+                                        "method": {
+                                            "title": "方式",
+                                            "enum": ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
+                                        },
+                                        "headers": {
+                                            "title": "头部",
+                                            "properties": {
+                                                "Authorization": {"title": "授权密钥"}
+                                            }
+                                        },
+                                        "rejectUnauthorized": {"title": "执行证书检查", "default": true},
+                                        "proxy": {"title": "代理", "default": "http://127.0.0.1:1080"},
+                                        "body": {"title": "携带的字符串或者二进制数据", "default": ""},
+                                        "json": {"title": "json对象数据(Content-Type: application/json)", "type": "object"},
+                                        "form": {"title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
+                                        "formData": {
+                                            "title": "表单数据(Content-Type: multipart/form-data)",
+                                            "properties": {
+                                                "file": {
+                                                    "title": "文件",
+                                                    "properties": {
+                                                        "value": {"title": "二进制数据"},
+                                                        "options": {
+                                                            "title": "文件选项",
+                                                            "properties": {
+                                                                "filename": {"title": "文件名"}
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -318,19 +409,23 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "commands_cfgs": {"title": "命令配置集", "type": "array", "items": {
-                                    "type": "object",
-                                    "title": "命令配置",
-                                    "properties": {
-                                        "title": { "title": "命令标题" },
-                                        "commands":{ 
-                                            "title": "命令集",
-                                            "type": "array",
-                                            "items": {"$ref": "#/definitions/command"}
-                                        }
-                                    },
-                                    "required": ["title", "commands"]
-                                }}
+                                "commands_cfgs": {
+                                    "title": "命令配置集",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "title": "命令配置",
+                                        "properties": {
+                                            "title": {"title": "命令标题"},
+                                            "commands": {
+                                                "title": "命令集",
+                                                "type": "array",
+                                                "items": {"$ref": "#/definitions/command"}
+                                            }
+                                        },
+                                        "required": ["title", "commands"]
+                                    }
+                                }
                             },
                             "required": ["commands_cfgs"],
                             "allOf": [
@@ -402,7 +497,10 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "name": {"title": "卦名", "enum": ["乾","坤","屯","蒙","需","讼","师","比","小畜","履","泰","否","同人","大有","谦","豫","随","蛊","临","观","噬嗑","贲","剥","复","无妄","大畜","颐","大过","坎","离","咸","恒","遁","大壮","晋","明夷","家人","睽","蹇","解","损","益","夬","姤","萃","升","困","井","革","鼎","震","艮","渐","归妹","丰","旅","巽","兑","涣","节","中孚","小过","既济","未济"]}
+                                "name": {
+                                    "title": "卦名",
+                                    "enum": ["乾", "坤", "屯", "蒙", "需", "讼", "师", "比", "小畜", "履", "泰", "否", "同人", "大有", "谦", "豫", "随", "蛊", "临", "观", "噬嗑", "贲", "剥", "复", "无妄", "大畜", "颐", "大过", "坎", "离", "咸", "恒", "遁", "大壮", "晋", "明夷", "家人", "睽", "蹇", "解", "损", "益", "夬", "姤", "萃", "升", "困", "井", "革", "鼎", "震", "艮", "渐", "归妹", "丰", "旅", "巽", "兑", "涣", "节", "中孚", "小过", "既济", "未济"]
+                                }
                             },
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
@@ -420,8 +518,7 @@
                         "data": {
                             "type": "object",
                             "title": "命令参数",
-                            "properties": {
-                            },
+                            "properties": {},
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
                             ]
@@ -461,8 +558,16 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "from": {"title": "来源语言", "default": "auto", "enum": ["auto", "ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]},
-                                "to": {"title": "目标语言", "default": "zh", "enum": ["ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]}
+                                "from": {
+                                    "title": "来源语言",
+                                    "default": "auto",
+                                    "enum": ["auto", "ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]
+                                },
+                                "to": {
+                                    "title": "目标语言",
+                                    "default": "zh",
+                                    "enum": ["ach", "afr", "aka", "alb", "amh", "ara", "arg", "arm", "arq", "asm", "ast", "aym", "aze", "bak", "bal", "baq", "bel", "bem", "ben", "ber", "bho", "bis", "bli", "bos", "bre", "bul", "bur", "cat", "ceb", "chr", "cht", "chv", "cor", "cos", "cre", "cri", "cs", "dan", "de", "div", "el", "en", "eno", "epo", "est", "fao", "fil", "fin", "fra", "fri", "frm", "frn", "fry", "ful", "geo", "gla", "gle", "glg", "glv", "gra", "grn", "guj", "hak", "hau", "haw", "heb", "hi", "hil", "hkm", "hmn", "hrv", "ht", "hu", "hup", "ibo", "ice", "id", "ido", "iku", "ina", "ing", "ir", "it", "jav", "jp", "kab", "kah", "kal", "kan", "kas", "kau", "kin", "kir", "kli", "kok", "kon", "kor", "kur", "lag", "lao", "lat", "lav", "lim", "lin", "lit", "log", "loj", "los", "ltz", "lug", "mac", "mah", "mai", "mal", "mao", "mar", "mau", "may", "mg", "mlt", "mot", "nbl", "nea", "nep", "nl", "nno", "nob", "nor", "nqo", "nya", "oci", "oji", "ori", "orm", "oss", "pam", "pan", "pap", "ped", "per", "pl", "pot", "pt", "pus", "que", "ro", "roh", "rom", "ru", "ruy", "san", "sec", "sha", "sil", "sin", "sk", "slo", "sm", "sme", "sna", "snd", "sol", "som", "sot", "spa", "src", "srd", "srp", "sun", "swa", "swe", "syr", "tam", "tat", "tel", "tet", "tgk", "tgl", "th", "tir", "tr", "tso", "tua", "tuk", "twi", "ukr", "ups", "urd", "ven", "vie", "wel", "wln", "wol", "wyw", "xho", "yid", "yor", "yue", "zaz", "zh", "zul"]
+                                }
                             },
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
@@ -481,7 +586,7 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "run_immediately": { "title": "立即执行一次任务", "default": true },
+                                "run_immediately": {"title": "立即执行一次任务", "default": true},
                                 "delay": {"title": "延时(毫秒)", "default": 60000},
                                 "repeat": {"title": "总重复次数", "default": 0},
                                 "repeat_mapping": {"title": "总重复次数保存名称", "default": "repeat"},
@@ -507,19 +612,19 @@
                             "properties": {
                                 "url": {"title": "连接地址", "default": "ws://"},
                                 "name": {"title": "连接名称", "default": ""},
-                                "timeout": {"title": "连接超时(ms)", "default": 5000 },
-                                "quiet": {"title": "安静模式", "default": true },
+                                "timeout": {"title": "连接超时(ms)", "default": 5000},
+                                "quiet": {"title": "安静模式", "default": true},
                                 "protocols": {"title": "协议"},
-                                "little_endian": {"title": "最低有效字节位于最前(小端)", "default": true },
+                                "little_endian": {"title": "最低有效字节位于最前(小端)", "default": true},
                                 "headers": {"title": "头部解析"},
                                 "body_retrieval": {"title": "包体类型拼接"},
                                 "bodies": {"title": "包体解析"},
                                 "sends": {"title": "连接成功后发送"},
-                                "options": { 
-                                    "type": "object", 
+                                "options": {
+                                    "type": "object",
                                     "title": "额外选项",
                                     "properties": {
-                                        "rejectUnauthorized":{ "title": "执行证书检查", "default": true }
+                                        "rejectUnauthorized": {"title": "执行证书检查", "default": true}
                                     }
                                 }
                             },
@@ -545,11 +650,29 @@
                             "title": "命令参数",
                             "properties": {
                                 "trim": {"title": "裁剪输出结果"},
-                                "capture_stdout": {"title": "捕获输出", "default": true },
-                                "instant_stdout": {"title": "即时打印输出，需配合 capture_stdout", "default": true },
-                                "ignore_code": {"title": "忽略错误码", "default": true },
-                                "inputs": {"title": "输入", "default": []},
-                                "encoding": {"title": "编码", "enum": [null, "ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "latin1", "binary", "hex"]},
+                                "capture_stdout": {"title": "捕获输出", "default": true},
+                                "instant_stdout": {"title": "即时打印输出，需配合 capture_stdout", "default": true},
+                                "ignore_code": {"title": "忽略错误码", "default": true},
+                                "inputs": {
+                                    "title": "输入",
+                                    "default": []
+                                },
+                                "encoding": {
+                                    "title": "编码",
+                                    "enum": [
+                                        null,
+                                        "ascii",
+                                        "utf8",
+                                        "utf-8",
+                                        "utf16le",
+                                        "ucs2",
+                                        "ucs-2",
+                                        "base64",
+                                        "latin1",
+                                        "binary",
+                                        "hex"
+                                    ]
+                                },
                                 "shell": {"title": "shell模式执行", "default": true},
                                 "cmd": {"title": "命令行"}
                             },
@@ -678,10 +801,13 @@
                                 "host": {"title": "服务器名称", "default": "outlook.office365.com"},
                                 "port": {"title": "端口", "default": 993},
                                 "tls": {"title": "启用ssl安全链接", "default": true},
-                                "search": {"title": "邮件数据映射", "default": [ "UNSEEN" ] },
-                                "value_mapping": {"title": "邮件数据映射", "default": "mail_data" }
+                                "search": {
+                                    "title": "邮件数据映射",
+                                    "default": ["UNSEEN"]
+                                },
+                                "value_mapping": {"title": "邮件数据映射", "default": "mail_data"}
                             },
-                            "required": [ "user", "password", "host" ],
+                            "required": ["user", "password", "host"],
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
                             ]
@@ -733,7 +859,7 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "timeout": {"title": "延时(ms)", "default": 3000, "type":"integer"}
+                                "timeout": {"title": "延时(ms)", "default": 3000, "type": "integer"}
                             },
                             "required": ["timeout"],
                             "allOf": [
@@ -784,28 +910,13 @@
                                     "type": "object",
                                     "title": "腾讯云配置",
                                     "properties": {
-                                        "secret_id": {
-                                            "type": "string",
-                                            "title": "秘钥ID"
-                                        },
-                                        "secret_key": {
-                                            "type": "string",
-                                            "title": "秘钥键"
-                                        },
-                                        "bucket": {
-                                            "type": "string",
-                                            "title": "仓库"
-                                        },
-                                        "appid": {
-                                            "type": "string",
-                                            "title": "产品id"
-                                        },
-                                        "region": {
-                                            "type": "string",
-                                            "title": "区域"
-                                        }
+                                        "secret_id": {"type": "string", "title": "秘钥ID"},
+                                        "secret_key": {"type": "string", "title": "秘钥键"},
+                                        "bucket": {"type": "string", "title": "仓库"},
+                                        "appid": {"type": "string", "title": "产品id"},
+                                        "region": {"type": "string", "title": "区域"}
                                     },
-                                    "required": [ "secret_id","secret_key","bucket","appid","region" ]
+                                    "required": ["secret_id", "secret_key", "bucket", "appid", "region"]
                                 },
                                 "mode": {
                                     "title": "模式",
