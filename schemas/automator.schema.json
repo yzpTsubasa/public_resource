@@ -481,6 +481,7 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
+                                "run_immediately": { "title": "立即执行一次任务", "default": true },
                                 "delay": {"title": "延时(毫秒)", "default": 60000},
                                 "repeat": {"title": "总重复次数", "default": 0},
                                 "repeat_mapping": {"title": "总重复次数保存名称", "default": "repeat"},
