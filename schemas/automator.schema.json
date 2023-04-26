@@ -13,7 +13,7 @@
                     "type": "array",
                     "items": {"$ref": "#/definitions/command"}
                 },
-                "force": {"title": "强制执行"},
+                "force": {"title": "强制执行", "default": true},
                 "full_match": {"title": "保留完整匹配对象"},
                 "flags": {"title": "flags"},
                 "struct": {"title": "匹配结果的结构"},
