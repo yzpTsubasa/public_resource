@@ -317,6 +317,7 @@
                                     "enum": ["DEFAULT", "RAW", "HEADERS", "STATUS_CODE", "BODY"]
                                 },
                                 "quiet": {"title": "安静模式", "default": true},
+                                "check_status_code": {"title": "检查 statusCode", "default": true},
                                 "options": {
                                     "type": "object",
                                     "properties": {
