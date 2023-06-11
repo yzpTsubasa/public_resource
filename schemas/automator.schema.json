@@ -461,6 +461,51 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "send_email", "title": "发送邮件"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "client": {"title": "客户端配置", "type": "object", "properties": {                               
+                                    "user":{ "title": "发件人邮箱", "default": "x@y.z"},
+                                    "password":{ "title": "密码"},
+                                    "host":{ "title": "主机", "default": "smtp.x.y"}
+                                }, "required": ["user", "password", "host"]},
+                                "message": {"title": "消息体", "type": "object", "properties": {
+                                    "text": { "title": "内容" },
+                                    "from": { "title": "发件人邮箱", "default": "x@y.z"},
+                                    "to": { "title": "收件人邮箱(逗号\",\"分割)", "default": "x@y.z"},
+                                    "cc": { "title": "抄送人邮箱(逗号\",\"分割)", "default": "x@y.z"},
+                                    "subject": { "title": "主题", "default": ""},
+                                    "attachment":{ "title": "附件", "type": "array", "items": {
+                                        "anyOf": [
+                                            { "type": "object", "properties": {
+                                                "path": { "title": "路径" },
+                                                "type":{ "title": "附件类型" },
+                                                "name":{ "title": "文件名" }
+                                            }},
+                                            { "type": "object", "properties": {
+                                                "stream": { "title": "流数据" },
+                                                "type":{ "title": "附件类型" },
+                                                "name":{ "title": "文件名" }
+                                            }}
+                                        ]
+                                    } }
+                                }}
+                            },
+                            "required": ["client"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "shortcut", "title": "设置快捷键"},
                         "data": {
                             "type": "object",
