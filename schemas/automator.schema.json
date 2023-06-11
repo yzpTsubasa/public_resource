@@ -483,15 +483,15 @@
                                                 "path": { "title": "路径" },
                                                 "type":{ "title": "附件类型" },
                                                 "name":{ "title": "文件名" }
-                                            }},
+                                            }, "required": ["path", "type", "name"]},
                                             { "type": "object", "properties": {
                                                 "stream": { "title": "流数据" },
                                                 "type":{ "title": "附件类型" },
                                                 "name":{ "title": "文件名" }
-                                            }}
+                                            }, "required": ["stream", "type", "name"]}
                                         ]
                                     } }
-                                }}
+                                }, "required": ["text", "from", "to", "subject"]}
                             },
                             "required": ["client"],
                             "allOf": [
