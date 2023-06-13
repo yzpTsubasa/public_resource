@@ -317,6 +317,32 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "assert", "title": "断言"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "key": {
+                                    "title": "键",
+                                    "anyOf": [
+                                        { "type": "string" },
+                                        { "type": "array", "items": {"type": "string"} }
+                                    ]
+                                }
+                            },
+                            "required": ["key"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {
                             "enum": ["http_request", "request", "download"],
                             "title": "http请求/下载"
