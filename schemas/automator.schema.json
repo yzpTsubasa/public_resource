@@ -59,6 +59,7 @@
                                 }
                             ]
                         },
+                        "mode": {"title": "写入模式", "enum": ["merge", "concat"]},
                         "overwrite": {"title": "强制覆盖"},
                         "strategy": {
                             "title": "策略",
