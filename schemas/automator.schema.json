@@ -151,6 +151,7 @@
                 "log": {"title": "记录结果在日志中", "type": "boolean"},
                 "required": {"title": "结果不能为空", "type": "boolean"},
                 "retry": {"title": "重试次数", "type": "number"},
+                "side_effect": {"title": "有副作用，在 DRY_RUN 模式下不执行", "default": true},
                 "automatic": {"type": "boolean", "title": "是否自动执行"}
             }
         },
