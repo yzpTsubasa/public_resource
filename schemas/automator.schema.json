@@ -19,57 +19,62 @@
                 "struct": {"title": "匹配结果的结构"},
                 "options": {
                     "title": "额外选项",
-                    "type": "object",
-                    "properties": {
-                        "indent": {"title": "缩进", "default": 2},
-                        "encoding": {
-                            "title": "编码方式",
-                            "default": null,
-                            "enum": [
-                                null,
-                                "ascii",
-                                "utf8",
-                                "utf-8",
-                                "utf16le",
-                                "ucs2",
-                                "ucs-2",
-                                "base64",
-                                "latin1",
-                                "binary",
-                                "hex"
-                            ]
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "indent": {"title": "缩进", "default": 2},
+                                "encoding": {
+                                    "title": "编码方式",
+                                    "default": null,
+                                    "enum": [
+                                        null,
+                                        "ascii",
+                                        "utf8",
+                                        "utf-8",
+                                        "utf16le",
+                                        "ucs2",
+                                        "ucs-2",
+                                        "base64",
+                                        "latin1",
+                                        "binary",
+                                        "hex"
+                                    ]
+                                },
+                                "auto_encoding": {"title": "自动检查编码", "default": true},
+                                "rename": {
+                                    "anyOf": [
+                                        {"title": "新文件名", "type": "string"},
+                                        {
+                                            "type": "object",
+                                            "title": "重命名",
+                                            "properties": {
+                                                "base_trim_left": {"title": "修剪文件名左侧"},
+                                                "base_trim_right": {"title": "修剪文件名右侧"},
+                                                "dir_trim_left": {"title": "修剪路径左侧"},
+                                                "dir_trim_right": {"title": "修剪路径右侧"},
+                                                "dir_prefix": {"title": "添加路径前缀"},
+                                                "dir_suffix": {"title": "添加路径后缀"},
+                                                "base_prefix": {"title": "添加文件名前缀"},
+                                                "base_suffix": {"title": "添加文件名后缀"}
+                                            }
+                                        }
+                                    ]
+                                },
+                                "mode": {
+                                    "title": "写入模式",
+                                    "enum": ["merge", "concat"]
+                                },
+                                "overwrite": {"title": "强制覆盖"},
+                                "strategy": {
+                                    "title": "策略",
+                                    "enum": ["lazy", "hash", "force"]
+                                },
+                                "strip_comments": {"title": "去除注释"}
+                            }
                         },
-                        "auto_encoding": {"title": "自动检查编码", "default": true},
-                        "rename": {
-                            "anyOf": [
-                                {"title": "新文件名", "type": "string"},
-                                {
-                                    "type": "object",
-                                    "title": "重命名",
-                                    "properties": {
-                                        "base_trim_left": {"title": "修剪文件名左侧"},
-                                        "base_trim_right": {"title": "修剪文件名右侧"},
-                                        "dir_trim_left": {"title": "修剪路径左侧"},
-                                        "dir_trim_right": {"title": "修剪路径右侧"},
-                                        "dir_prefix": {"title": "添加路径前缀"},
-                                        "dir_suffix": {"title": "添加路径后缀"},
-                                        "base_prefix": {"title": "添加文件名前缀"},
-                                        "base_suffix": {"title": "添加文件名后缀"}
-                                    }
-                                }
-                            ]
-                        },
-                        "mode": {
-                            "title": "写入模式",
-                            "enum": ["merge", "concat"]
-                        },
-                        "overwrite": {"title": "强制覆盖"},
-                        "strategy": {
-                            "title": "策略",
-                            "enum": ["lazy", "hash", "force"]
-                        },
-                        "strip_comments": {"title": "去除注释"}
-                    }
+                        {"type": "string"}
+                    ]
                 },
                 "type": {
                     "title": "类型",
