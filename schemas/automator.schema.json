@@ -281,7 +281,13 @@
                                 },
                                 "title": {"title": "消息标题"},
                                 "content": {"title": "消息内容"},
-                                "atMobiles": {"title": "被@人的手机号", "type": "array"},
+                                "atMobiles": {
+                                    "title": "被@人的手机号",
+                                    "anyOf": [
+                                        {"type": "array"},
+                                        {"type": "string"}
+                                    ]
+                                },
                                 "atUserIds": {"title": "被@人的用户userid", "type": "array"},
                                 "isAtAll": {"title": "@所有人是true，否则为false", "type": "boolean"},
                                 "secret": {"title": "加签"},
