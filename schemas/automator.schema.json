@@ -59,7 +59,10 @@
                                 }
                             ]
                         },
-                        "mode": {"title": "写入模式", "enum": ["merge", "concat"]},
+                        "mode": {
+                            "title": "写入模式",
+                            "enum": ["merge", "concat"]
+                        },
                         "overwrite": {"title": "强制覆盖"},
                         "strategy": {
                             "title": "策略",
@@ -186,30 +189,37 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "actions": {"title": "操作集", "type": "array", "items": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": { "const": "delete", "title": "删除" },
-                                                "data": {
-                                                    "anyOf": [
-                                                        {"type": "object"},
-                                                        {"type": "array", "items": {"type": "string"}}
-                                                    ]
+                                "actions": {
+                                    "title": "操作集",
+                                    "type": "array",
+                                    "items": {
+                                        "anyOf": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {"const": "delete", "title": "删除"},
+                                                    "data": {
+                                                        "anyOf": [
+                                                            {"type": "object"},
+                                                            {
+                                                                "type": "array",
+                                                                "items": {"type": "string"}
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {"const": "update", "title": "更新"},
+                                                    "data": {"type": "object"}
                                                 }
                                             }
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": { "const": "update", "title": "更新" },
-                                                "data": {"type": "object"}
-                                            }
-                                        }
-                                    ],
-                                    "required": ["type", "data"]
-                                }}
+                                        ],
+                                        "required": ["type", "data"]
+                                    }
+                                }
                             },
                             "required": ["actions"],
                             "allOf": [
@@ -236,7 +246,7 @@
                                         "type": "object",
                                         "properties": {
                                             "path": {"title": "路径", "default": ""},
-                                            "content": {"title": "内容(string|buffer)" }
+                                            "content": {"title": "内容(string|buffer)"}
                                         }
                                     }
                                 }
@@ -327,8 +337,11 @@
                                 "key": {
                                     "title": "键",
                                     "anyOf": [
-                                        { "type": "string" },
-                                        { "type": "array", "items": {"type": "string"} }
+                                        {"type": "string"},
+                                        {
+                                            "type": "array",
+                                            "items": {"type": "string"}
+                                        }
                                     ]
                                 }
                             },
@@ -370,41 +383,46 @@
                                 "quiet": {"title": "安静模式", "default": true},
                                 "ignore_status_code": {"title": "忽略 statusCode", "default": true},
                                 "options": {
-                                    "type": "object",
-                                    "properties": {
-                                        "method": {
-                                            "title": "方式",
-                                            "enum": ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
-                                        },
-                                        "headers": {
-                                            "title": "头部",
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
                                             "properties": {
-                                                "Authorization": {"title": "授权密钥"}
-                                            }
-                                        },
-                                        "rejectUnauthorized": {"title": "执行证书检查", "default": true},
-                                        "proxy": {"title": "代理", "default": "http://127.0.0.1:1080"},
-                                        "body": {"title": "携带的字符串或者二进制数据", "default": ""},
-                                        "json": {"title": "json对象数据(Content-Type: application/json)", "type": "object"},
-                                        "form": {"title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
-                                        "formData": {
-                                            "title": "表单数据(Content-Type: multipart/form-data)",
-                                            "properties": {
-                                                "file": {
-                                                    "title": "文件",
+                                                "method": {
+                                                    "title": "方式",
+                                                    "enum": ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
+                                                },
+                                                "headers": {
+                                                    "title": "头部",
                                                     "properties": {
-                                                        "value": {"title": "二进制数据"},
-                                                        "options": {
-                                                            "title": "文件选项",
+                                                        "Authorization": {"title": "授权密钥"}
+                                                    }
+                                                },
+                                                "rejectUnauthorized": {"title": "执行证书检查", "default": true},
+                                                "proxy": {"title": "代理", "default": "http://127.0.0.1:1080"},
+                                                "body": {"title": "携带的字符串或者二进制数据", "default": ""},
+                                                "json": {"title": "json对象数据(Content-Type: application/json)", "type": "object"},
+                                                "form": {"title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
+                                                "formData": {
+                                                    "title": "表单数据(Content-Type: multipart/form-data)",
+                                                    "properties": {
+                                                        "file": {
+                                                            "title": "文件",
                                                             "properties": {
-                                                                "filename": {"title": "文件名"}
+                                                                "value": {"title": "二进制数据"},
+                                                                "options": {
+                                                                    "title": "文件选项",
+                                                                    "properties": {
+                                                                        "filename": {"title": "文件名"}
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
+                                        },
+                                        {"type": "string"}
+                                    ]
                                 }
                             },
                             "allOf": [
@@ -517,32 +535,54 @@
                             "type": "object",
                             "title": "命令参数",
                             "properties": {
-                                "client": {"title": "客户端配置", "type": "object", "properties": {                               
-                                    "user":{ "title": "发件人邮箱", "default": "x@y.z"},
-                                    "password":{ "title": "密码"},
-                                    "host":{ "title": "主机", "default": "smtp.x.y"}
-                                }, "required": ["user", "password", "host"]},
-                                "message": {"title": "消息体", "type": "object", "properties": {
-                                    "text": { "title": "内容" },
-                                    "from": { "title": "发件人邮箱", "default": "x@y.z"},
-                                    "to": { "title": "收件人邮箱(逗号\",\"分割)", "default": "x@y.z"},
-                                    "cc": { "title": "抄送人邮箱(逗号\",\"分割)", "default": "x@y.z"},
-                                    "subject": { "title": "主题", "default": ""},
-                                    "attachment":{ "title": "附件", "type": "array", "items": {
-                                        "anyOf": [
-                                            { "type": "object", "properties": {
-                                                "path": { "title": "路径" },
-                                                "type":{ "title": "附件类型" },
-                                                "name":{ "title": "文件名" }
-                                            }, "required": ["path", "type", "name"]},
-                                            { "type": "object", "properties": {
-                                                "stream": { "title": "流数据" },
-                                                "type":{ "title": "附件类型" },
-                                                "name":{ "title": "文件名" }
-                                            }, "required": ["stream", "type", "name"]}
-                                        ]
-                                    } }
-                                }, "required": ["text", "from", "to", "subject"]}
+                                "client": {
+                                    "title": "客户端配置",
+                                    "type": "object",
+                                    "properties": {
+                                        "user": {"title": "发件人邮箱", "default": "x@y.z"},
+                                        "password": {"title": "密码"},
+                                        "host": {"title": "主机", "default": "smtp.x.y"}
+                                    },
+                                    "required": ["user", "password", "host"]
+                                },
+                                "message": {
+                                    "title": "消息体",
+                                    "type": "object",
+                                    "properties": {
+                                        "text": {"title": "内容"},
+                                        "from": {"title": "发件人邮箱", "default": "x@y.z"},
+                                        "to": {"title": "收件人邮箱(逗号\",\"分割)", "default": "x@y.z"},
+                                        "cc": {"title": "抄送人邮箱(逗号\",\"分割)", "default": "x@y.z"},
+                                        "subject": {"title": "主题", "default": ""},
+                                        "attachment": {
+                                            "title": "附件",
+                                            "type": "array",
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "path": {"title": "路径"},
+                                                            "type": {"title": "附件类型"},
+                                                            "name": {"title": "文件名"}
+                                                        },
+                                                        "required": ["path", "type", "name"]
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "stream": {"title": "流数据"},
+                                                            "type": {"title": "附件类型"},
+                                                            "name": {"title": "文件名"}
+                                                        },
+                                                        "required": ["stream", "type", "name"]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": ["text", "from", "to", "subject"]
+                                }
                             },
                             "required": ["client"],
                             "allOf": [
