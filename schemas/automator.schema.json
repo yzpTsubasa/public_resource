@@ -1003,6 +1003,33 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "list2dict", "title": "列表转字典"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "key_index": {
+                                    "title": "键索引, 数值或者字符串"
+                                },
+                                "value_index": {
+                                    "title": "值索引, 数值或者字符串"
+                                },
+                                "value_self": {
+                                    "title": "使用自身为值", "default": true
+                                }
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "sleep", "title": "睡眠"},
                         "data": {
                             "type": "object",
