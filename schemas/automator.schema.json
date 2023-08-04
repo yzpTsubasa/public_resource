@@ -127,7 +127,7 @@
                 "cache_key": {"title": "缓存键"},
                 "cache_type": {
                     "title": "缓存类型",
-                    "enum": ["local", "svn", "simple_sqlite", "simple_svn", "simple_local"]
+                    "enum": ["local", "svn", "simple_svn", "simple_local"]
                 },
                 "delimiter": {"title": "分隔符", "default": ","},
                 "props": {"title": "属性"},
