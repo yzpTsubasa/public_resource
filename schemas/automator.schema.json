@@ -1018,6 +1018,7 @@
                                     "title": "使用自身为值", "default": true
                                 }
                             },
+                            "required": ["key_index"],
                             "allOf": [
                                 {"$ref": "#/definitions/common_data"}
                             ]
