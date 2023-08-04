@@ -940,6 +940,28 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "image_crop", "title": "裁剪图片"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "src": {"title": "图片地址"},
+                                "dst": {"title": "保存地址"},
+                                "region": {"title": "截取区域{x,y,w,h}"}
+                            },
+                            "required": ["src", "dst", "region"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "watch_mail", "title": "监听邮件"},
                         "data": {
                             "type": "object",
