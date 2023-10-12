@@ -541,6 +541,26 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "cursor_up", "title": "光标上移"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "line": {"title": "上移行数"}
+                            },
+                            "required": ["line"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "send_email", "title": "发送邮件"},
                         "data": {
                             "type": "object",
