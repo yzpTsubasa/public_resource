@@ -411,6 +411,7 @@
                                                 },
                                                 "rejectUnauthorized": {"title": "执行证书检查", "default": true},
                                                 "proxy": {"title": "代理", "default": "http://127.0.0.1:1080"},
+                                                "gzip": {"title": "自动解压gzip", "default": true },
                                                 "body": {"title": "携带的字符串或者二进制数据", "default": ""},
                                                 "json": {"title": "json对象数据(Content-Type: application/json)", "type": "object"},
                                                 "form": {"title": "json对象数据(Content-Type: application/x-www-form-urlencoded)", "type": "object"},
