@@ -880,6 +880,26 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "register_search_install_location", "title": "本机软件安装目录"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "target": {"title": "目标软件的注册项名称"}
+                            },
+                            "required": ["target"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "compare", "title": "比较两个对象"},
                         "data": {
                             "type": "object",
