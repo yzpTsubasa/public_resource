@@ -161,6 +161,7 @@
                 "retry": {"title": "重试次数", "type": "number"},
                 "side_effect": {"title": "有副作用，在 DRY_RUN 模式下不执行", "default": true},
                 "raw": {"title": "raw模式,不对data进行格式化", "default": true},
+                "async": {"title": "异步执行", "default": true},
                 "automatic": {"type": "boolean", "title": "是否自动执行"}
             }
         },
