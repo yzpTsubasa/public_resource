@@ -1116,6 +1116,28 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "deobfuscate", "title": "代码反混淆"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "sourceType": {"title": "源码类型", "default": "unambiguous", "enum": ["script", "module", "unambiguous"]},
+                                "config": {"title": "配置", "type":"object", "properties": {
+                                    "silent":{"title": "安静模式", "default": true}
+                                }}
+                            },
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "hash", "title": "散列值"},
                         "data": {
                             "type": "object",
