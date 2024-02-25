@@ -21,7 +21,13 @@ input_worktime_per_day.addEventListener("input", function () {
   processDingTalkInput();
 });
 btn_read_clipboard.addEventListener("click", function () {
+    input_dingtalk.value = "";
+    clearStatus();
   // 网页获取剪切板内容
+  if (!navigator.clipboard) {
+    addStatus("不支持自动读取剪贴板,请手动粘贴到输入框", "danger");
+    return;
+  }
   navigator.clipboard
     .readText()
     .then((text) => {
