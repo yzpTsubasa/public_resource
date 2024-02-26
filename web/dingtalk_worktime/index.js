@@ -21,8 +21,8 @@ input_worktime_per_day.addEventListener("input", function () {
   processDingTalkInput();
 });
 btn_read_clipboard.addEventListener("click", function () {
-    input_dingtalk.value = "";
-    clearStatus();
+  input_dingtalk.value = "";
+  clearStatus();
   // 网页获取剪切板内容
   if (!navigator.clipboard) {
     addStatus("不支持自动读取剪贴板,请手动粘贴到输入框", "danger");
@@ -38,8 +38,22 @@ btn_read_clipboard.addEventListener("click", function () {
       addStatus("无法读取剪贴板内容：" + err, "danger");
     });
 });
-
+let hasNotificationPermission = false;
+let notificationTimer;
+function updateNotificationPermission() {
+  hasNotificationPermission =
+    window.Notification && Notification.permission === "granted";
+  if (window.Notification && Notification.permission !== "granted") {
+    Notification.requestPermission(function (status) {
+      hasNotificationPermission = status === "granted";
+      if (!hasNotificationPermission) {
+        addStatus("无法获取通知权限", "warning");
+      }
+    });
+  }
+}
 function processDingTalkInput() {
+  updateNotificationPermission();
   processDingTalkWorktime(input_dingtalk.value, input_worktime_per_day.value);
 }
 
@@ -101,7 +115,10 @@ function processDingTalkWorktime(content, worktimePerDay) {
       month: "short",
       day: "numeric",
     });
-    const total = begTime && endTime ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})` : "";
+    const total =
+      begTime && endTime
+        ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})`
+        : "";
     addStatus(
       `[${date}] ${formatTime(begTime)} > ${formatTime(endTime)} ${total}`
     );
@@ -127,6 +144,16 @@ function processDingTalkWorktime(content, worktimePerDay) {
         lastDay.begTime.getTime() + diff * 60 * 1000
       );
       addStatus(`建议下班打卡时间: ${needEndTime.toLocaleString()}`, "success");
+      const leftTime = needEndTime.getTime() - Date.now();
+      if (leftTime > 0 && hasNotificationPermission) {
+        notificationTimer && clearTimeout(notificationTimer);
+        notificationTimer = setTimeout(() => {
+          new Notification(`建议下班打卡时间: ${needEndTime.toLocaleTimeString()}`, {
+            icon: "./favicon.png"
+          })
+        }, leftTime);
+        addStatus(`将在 ${formatMilliSeconds(leftTime)} 后提醒`, "success");
+      }
     }
   }
 }
@@ -156,9 +183,9 @@ function formatMinutes(minutes) {
 }
 
 function formatMilliSeconds(milliseconds) {
-    return formatMinutes(milliseconds / 1000 / 60);
+  return formatMinutes(Math.floor(milliseconds / 1000 / 60));
 }
 
 function formatTime(date) {
-    return date ? date.toLocaleTimeString() : "无";
+  return date ? date.toLocaleTimeString() : "无";
 }
