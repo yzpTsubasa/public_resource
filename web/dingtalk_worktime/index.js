@@ -37,16 +37,29 @@ Q("#btn_read_clipboard").addEventListener("click", function () {
       addStatus("无法读取剪贴板内容：" + err, "danger");
     });
 });
-
+let hasNotificationPermission = false;
+function updateNotificationPermission() {
+  hasNotificationPermission =
+    window.Notification && Notification.permission === "granted";
+  if (window.Notification && Notification.permission !== "granted") {
+    Notification.requestPermission(function (status) {
+      hasNotificationPermission = status === "granted";
+      if (!hasNotificationPermission) {
+        addStatus("无法获取通知权限", "warning");
+      }
+    });
+  }
+}
 function processDingTalkInput() {
+  updateNotificationPermission();
   processDingTalkWorktime(
     Q("#input_dingtalk").value,
     Q("#input_worktime_per_day").value
   );
 }
 
-function addStatus(message, style = "black") {
-  Q("#status_wrapper").innerHTML += `<p class=text-${style}>${message}</p>`;
+function addStatus(message) {
+  Q("#status_wrapper").innerHTML += `<p>${message}</p>`;
 }
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
@@ -55,7 +68,7 @@ function processDingTalkWorktime(content, worktimePerDay) {
   needEndTime = null;
   clearStatus();
   const matches = content.matchAll(
-    /打卡结果(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日查看详情/g
+    /(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
   );
 
   let begTime;
@@ -132,15 +145,26 @@ function processDingTalkWorktime(content, worktimePerDay) {
       lastDay.begTime.getTime() + diff * 60 * 1000
     );
     Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString()}`;
+    updateTimer();
     // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
   }
 }
 var needEndTime = null;
+var hasNotified = false;
 function updateTimer() {
   if (needEndTime) {
     const leftTime = needEndTime.getTime() - Date.now();
-    if (leftTime >= 0) {
-      Q("#label_off_duty").innerHTML = formatMilliSeconds(leftTime);
+    if (leftTime > 0) {
+      hasNotified = false;
+      Q("#label_off_duty").innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(leftTime, true)} 后提醒</span>`;
+    } else {
+      Q("#label_off_duty").innerHTML = `<span class="text-success">下班打卡时间到了(已过${formatMilliSeconds(-leftTime)})</span>`;
+      if (!hasNotified) {
+        hasNotified = true;
+        new Notification(`下班打卡时间到了: ${needEndTime.toLocaleTimeString()}`, {
+          icon: "./favicon.png"
+        });
+      }
     }
   }
 }
@@ -160,20 +184,30 @@ function isSameDay(date1, date2) {
   );
 }
 
-function formatMinutes(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const minutesLeft = minutes % 60;
-  if (minutesLeft) {
-    return `${hours}小时${minutesLeft}分钟`;
+function formatMilliSeconds(milliseconds, full) {
+  // 如果大于1小时,则显示小时和分钟
+  if (milliseconds > 60 * 60 * 1000) {
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    if (!full) {
+      return `${hours}小时${minutes}分钟`;
+    } else {
+      const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+      return `${hours}小时${minutes}分钟${seconds}秒`;
+    }
   }
-  if (hours) {
-    return `${hours}小时整`;
+  // 如果大于1分钟，则显示分钟和秒数
+  if (milliseconds > 60 * 1000) {
+    const minutes = Math.floor(milliseconds / (1000 * 60));
+    const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+    return `${minutes}分钟${seconds}秒`;
   }
-  return "0小时";
+  // 否则，直接显示秒数
+  return `${Math.floor(milliseconds / 1000)}秒`;
 }
 
-function formatMilliSeconds(milliseconds) {
-  return formatMinutes(milliseconds / 1000 / 60);
+function formatMinutes(minutes) {
+  return formatMilliSeconds(minutes * 60 * 1000);
 }
 
 function formatTime(date) {

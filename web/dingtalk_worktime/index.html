@@ -3,6 +3,7 @@
 <head>
     <title>钉钉打卡统计</title>
     <link rel="stylesheet" href="./bootstrap.min.css">
+    <link rel="icon" type="image/x-icon" href="./favicon.png">
     <style>
         body {
             display: flex;
@@ -26,19 +27,21 @@
                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                     data-bs-title="需要剪贴板权限">读取剪贴板</button>
             </div>
-            <div id="total_wrap">
+            <div id="total_wrap" class="text-secondary">
                 <p>累计工时: <span id="label_total"></span></p>
                 <p>还需时间: <span id="label_need"></span></p>
             </div>
             <div id="left_wrap" style="display: none;">
-                <p>建议打卡: <span id="label_recommend">2024/2/26 23:43:00</span></p>
-                <p>距离下班: <span id="label_off_duty">2024/2/26 23:43:00</span></p>
+                <p>建议打卡: <span id="label_recommend"></span></p>
+                <p><span id="label_off_duty"></span></p>
             </div>
             <hr>
-            <p>打卡记录: </p>
-            <p id="status_wrapper">
-
-            </p>
+            <div class="text-secondary">
+                <p>打卡记录: </p>
+                <p id="status_wrapper">
+    
+                </p>
+            </div>
         </div>
     </div>
     <script src="./bootstrap.bundle.min.js"></script>
