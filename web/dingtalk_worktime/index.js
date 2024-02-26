@@ -52,7 +52,7 @@ function clearStatus() {
 function processDingTalkWorktime(content, worktimePerDay) {
   clearStatus();
   const matches = content.matchAll(
-    /打卡结果(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
+    /(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
   );
 
   let begTime;
