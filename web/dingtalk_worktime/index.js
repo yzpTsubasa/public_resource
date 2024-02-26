@@ -1,10 +1,9 @@
-const input_dingtalk = document.getElementById("input_dingtalk");
-const status_wrapper = document.getElementById("status_wrapper");
-const input_worktime_per_day = document.getElementById(
-  "input_worktime_per_day"
-);
-const btn_read_clipboard = document.getElementById("btn_read_clipboard");
-
+function Q(selector) {
+  return document.querySelector(selector);
+}
+setInterval(() => {
+  updateTimer();
+}, 1000);
 // 启用tooltips
 const tooltipTriggerList = document.querySelectorAll(
   '[data-bs-toggle="tooltip"]'
@@ -13,16 +12,16 @@ const tooltipList = [...tooltipTriggerList].map(
   (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
 );
 
-// 监听 input_dingtalk 文本变化
-input_dingtalk.addEventListener("input", function () {
+// 监听 Q("#input_dingtalk") 文本变化
+Q("#input_dingtalk").addEventListener("input", function () {
   processDingTalkInput();
 });
-input_worktime_per_day.addEventListener("input", function () {
+Q("#input_worktime_per_day").addEventListener("input", function () {
   processDingTalkInput();
 });
-btn_read_clipboard.addEventListener("click", function () {
-    input_dingtalk.value = "";
-    clearStatus();
+Q("#btn_read_clipboard").addEventListener("click", function () {
+  Q("#input_dingtalk").value = "";
+  clearStatus();
   // 网页获取剪切板内容
   if (!navigator.clipboard) {
     addStatus("不支持自动读取剪贴板,请手动粘贴到输入框", "danger");
@@ -31,7 +30,7 @@ btn_read_clipboard.addEventListener("click", function () {
   navigator.clipboard
     .readText()
     .then((text) => {
-      input_dingtalk.value = text;
+      Q("#input_dingtalk").value = text;
       processDingTalkInput();
     })
     .catch((err) => {
@@ -40,16 +39,20 @@ btn_read_clipboard.addEventListener("click", function () {
 });
 
 function processDingTalkInput() {
-  processDingTalkWorktime(input_dingtalk.value, input_worktime_per_day.value);
+  processDingTalkWorktime(
+    Q("#input_dingtalk").value,
+    Q("#input_worktime_per_day").value
+  );
 }
 
 function addStatus(message, style = "black") {
-  status_wrapper.innerHTML += `<p class=text-${style}>${message}</p>`;
+  Q("#status_wrapper").innerHTML += `<p class=text-${style}>${message}</p>`;
 }
 function clearStatus() {
-  status_wrapper.innerHTML = "";
+  Q("#status_wrapper").innerHTML = "";
 }
 function processDingTalkWorktime(content, worktimePerDay) {
+  needEndTime = null;
   clearStatus();
   const matches = content.matchAll(
     /打卡结果(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日查看详情/g
@@ -101,7 +104,10 @@ function processDingTalkWorktime(content, worktimePerDay) {
       month: "short",
       day: "numeric",
     });
-    const total = begTime && endTime ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})` : "";
+    const total =
+      begTime && endTime
+        ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})`
+        : "";
     addStatus(
       `[${date}] ${formatTime(begTime)} > ${formatTime(endTime)} ${total}`
     );
@@ -113,20 +119,28 @@ function processDingTalkWorktime(content, worktimePerDay) {
   );
   const totalWorkTimeFormated = formatMinutes(totalWorkTimeInMinutes);
   const needWorkTimeInMinutes = worktimePerDay * 60 * history.length;
-  addStatus(
-    `总工时: ${totalWorkTimeFormated}/${formatMinutes(
-      needWorkTimeInMinutes
-    )}(共${history.length}天)`
-  );
+  Q("#label_total").innerHTML = `${totalWorkTimeFormated}/${formatMinutes(
+    needWorkTimeInMinutes
+  )}(共${history.length}天)`;
   const diff = needWorkTimeInMinutes - totalWorkTimeInMinutes;
-  if (diff > 0) {
-    addStatus(`还需: ${formatMinutes(diff)}`);
-    const lastDay = history[history.length - 1];
-    if (lastDay && !lastDay.endTime) {
-      const needEndTime = new Date(
-        lastDay.begTime.getTime() + diff * 60 * 1000
-      );
-      addStatus(`建议下班打卡时间: ${needEndTime.toLocaleString()}`, "success");
+  Q("#label_need").innerHTML = `${formatMinutes(diff)}`;
+  const lastDay = history[history.length - 1];
+  const showRecommend = lastDay && !lastDay.endTime;
+  Q("#left_wrap").style.display = showRecommend ? "" : "none";
+  if (showRecommend) {
+    needEndTime = new Date(
+      lastDay.begTime.getTime() + diff * 60 * 1000
+    );
+    Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString()}`;
+    // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
+  }
+}
+var needEndTime = null;
+function updateTimer() {
+  if (needEndTime) {
+    const leftTime = needEndTime.getTime() - Date.now();
+    if (leftTime >= 0) {
+      Q("#label_off_duty").innerHTML = formatMilliSeconds(leftTime);
     }
   }
 }
@@ -152,13 +166,16 @@ function formatMinutes(minutes) {
   if (minutesLeft) {
     return `${hours}小时${minutesLeft}分钟`;
   }
-  return `${hours}小时整`;
+  if (hours) {
+    return `${hours}小时整`;
+  }
+  return "0小时";
 }
 
 function formatMilliSeconds(milliseconds) {
-    return formatMinutes(milliseconds / 1000 / 60);
+  return formatMinutes(milliseconds / 1000 / 60);
 }
 
 function formatTime(date) {
-    return date ? date.toLocaleTimeString() : "无";
+  return date ? date.toLocaleTimeString() : "无";
 }

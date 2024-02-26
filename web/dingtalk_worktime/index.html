@@ -25,8 +25,17 @@
                 <button type="button" class="btn btn-primary" id="btn_read_clipboard" data-bs-toggle="tooltip"
                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                     data-bs-title="需要剪贴板权限">读取剪贴板</button>
-                
             </div>
+            <div id="total_wrap">
+                <p>累计工时: <span id="label_total"></span></p>
+                <p>还需时间: <span id="label_need"></span></p>
+            </div>
+            <div id="left_wrap" style="display: none;">
+                <p>建议打卡: <span id="label_recommend">2024/2/26 23:43:00</span></p>
+                <p>距离下班: <span id="label_off_duty">2024/2/26 23:43:00</span></p>
+            </div>
+            <hr>
+            <p>打卡记录: </p>
             <p id="status_wrapper">
 
             </p>
