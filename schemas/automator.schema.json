@@ -1198,6 +1198,40 @@
                     ]
                 },
                 {
+                    "type": "object",
+                    "properties": {
+                        "type": {"const": "ali_oss", "title": "阿里云"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "config": {
+                                    "type": "object",
+                                    "title": "腾讯云配置",
+                                    "properties": {
+                                        "region": {"type": "string", "title": "区域"},
+                                        "access_key_id": {"type": "string", "title": "秘钥ID"},
+                                        "access_key_secret": {"type": "string", "title": "秘钥键"},
+                                        "bucket": {"type": "string", "title": "仓库"}
+                                    },
+                                    "required": ["region", "access_key_id", "access_key_secret", "bucket"]
+                                },
+                                "mode": {
+                                    "title": "模式",
+                                    "enum": ["DOWNLOAD", "UPLOAD_FILE", "UPLOAD", "UPLOAD_FILES"]
+                                }
+                            },
+                            "required": ["config", "mode"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
                     "type": "string",
                     "title": "命令类型",
                     "enum": ["abort", "base", "confirm", "copy", "write_clipboard", "read_clipboard", "date", "debugger", "eval", "exec_from_file", "exec_shell", "files", "first_exist", "flatten", "git_commit", "git_export_diff_head", "git_is_dirty", "http_request", "input", "list2dict", "loop", "loop_forever", "move", "multi_select", "modify", "open", "parse", "pause", "print", "read_cfg", "read_plain", "remove", "request", "retrieve", "reveal", "select", "shell", "storage", "store", "storage_optional", "store_optional", "svn_is_dirty", "svn_update", "svn_export_diff_head", "test", "truncate", "truncate_all", "void", "write_cfg", "write_plain", "zip", "valid_required", "continue", "break", "stringify", "commit", "export_diff_head", "is_dirty", "which", "move_local", "edit", "schedule", "alert", "traversal", "notify", "log", "file_info", "read_excel", "ts_sort", "divination", "suan_gua", "file_size", "hash", "clear_screen"]
