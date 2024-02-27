@@ -1207,7 +1207,7 @@
                             "properties": {
                                 "config": {
                                     "type": "object",
-                                    "title": "腾讯云配置",
+                                    "title": "阿里云配置",
                                     "properties": {
                                         "region": {"type": "string", "title": "区域"},
                                         "access_key_id": {"type": "string", "title": "秘钥ID"},
