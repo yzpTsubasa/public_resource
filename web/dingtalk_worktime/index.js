@@ -22,6 +22,9 @@ Q("#input_worktime_per_day").addEventListener("input", function () {
 Q("#switch_filter").addEventListener("change", function () {
   processDingTalkInput();
 });
+Q("#input_alert_forward").addEventListener("input", function () {
+  processDingTalkInput();
+});
 Q("#btn_read_clipboard").addEventListener("click", function () {
   Q("#input_dingtalk").value = "";
   clearStatus();
@@ -59,6 +62,7 @@ function processDingTalkInput() {
     Q("#input_dingtalk").value,
     Q("#input_worktime_per_day").value,
     Q("#switch_filter").checked,
+    Q("#input_alert_forward").value,
   );
 }
 
@@ -68,7 +72,7 @@ function addStatus(message) {
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
 }
-function processDingTalkWorktime(content, worktimePerDay, filter) {
+function processDingTalkWorktime(content, worktimePerDay, filter, alertForward) {
   needEndTime = null;
   clearStatus();
   const matches = content.matchAll(
@@ -161,24 +165,51 @@ function processDingTalkWorktime(content, worktimePerDay, filter) {
     needEndTime = new Date(
       lastDay.begTime.getTime() + diff * 60 * 1000
     );
+    alerTime = new Date(
+      lastDay.begTime.getTime() + diff * 60 * 1000 - alertForward * 60 * 1000
+    );
     Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString()}`;
     updateTimer();
     // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
   }
 }
 var needEndTime = null;
+var alerTime = null;
 var hasNotified = false;
+var hasNotifiedAlert = false;
 function updateTimer() {
   if (needEndTime) {
     const leftTime = needEndTime.getTime() - Date.now();
+    const leftTimeAlert = alerTime.getTime() - Date.now();
     if (leftTime > 0) {
       hasNotified = false;
-      Q("#label_off_duty").innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(leftTime, true)} 后提醒</span>`;
+      if (leftTimeAlert == leftTime) {
+        Q("#label_off_duty").innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(leftTime, true)} 后提醒</span>`;
+      }else{
+        Q("#label_off_duty").innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(leftTime, true)} 后下班</span>`;
+      }
     } else {
       Q("#label_off_duty").innerHTML = `<span class="text-success">下班打卡时间到了(已过${formatMilliSeconds(-leftTime)})</span>`;
       if (!hasNotified) {
         hasNotified = true;
         new Notification(`下班打卡时间到了: ${needEndTime.toLocaleTimeString()}`, {
+          icon: "./favicon.png"
+        });
+      }
+    }
+
+    if (leftTimeAlert == leftTime || leftTime <= 0) {
+      return;
+    }
+
+    if (leftTimeAlert > 0) {
+      hasNotifiedAlert = false;
+      Q("#label_off_duty_alert").innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(leftTimeAlert, true)} 后提醒</span>`;
+    } else {
+      Q("#label_off_duty_alert").innerHTML = "";
+      if (!hasNotifiedAlert) {
+        hasNotifiedAlert = true;
+        new Notification(`还有 ${formatMilliSeconds(leftTime, true)} 分钟下班！`, {
           icon: "./favicon.png"
         });
       }
