@@ -19,6 +19,9 @@ Q("#input_dingtalk").addEventListener("input", function () {
 Q("#input_worktime_per_day").addEventListener("input", function () {
   processDingTalkInput();
 });
+Q("#switch_filter").addEventListener("change", function () {
+  processDingTalkInput();
+});
 Q("#btn_read_clipboard").addEventListener("click", function () {
   Q("#input_dingtalk").value = "";
   clearStatus();
@@ -54,7 +57,8 @@ function processDingTalkInput() {
   updateNotificationPermission();
   processDingTalkWorktime(
     Q("#input_dingtalk").value,
-    Q("#input_worktime_per_day").value
+    Q("#input_worktime_per_day").value,
+    Q("#switch_filter").checked,
   );
 }
 
@@ -64,7 +68,7 @@ function addStatus(message) {
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
 }
-function processDingTalkWorktime(content, worktimePerDay) {
+function processDingTalkWorktime(content, worktimePerDay, filter) {
   needEndTime = null;
   clearStatus();
   const matches = content.matchAll(
@@ -95,8 +99,8 @@ function processDingTalkWorktime(content, worktimePerDay) {
       if (!isSameDay(begTime, time)) {
         addStatus(
           `打卡记录不完整: <br> 上班:${
-            begTime?.toLocaleString() || "无"
-          }<br>下班:${time?.toLocaleString() || "无"} `,
+            begTime?.toLocaleString() || "未打卡"
+          }<br>下班:${time?.toLocaleString() || "未打卡"} `,
           "danger"
         );
         continue;
@@ -109,7 +113,20 @@ function processDingTalkWorktime(content, worktimePerDay) {
       isNewDay = false;
     }
   }
-  history.forEach((item) => {
+  // 过滤非相邻天数
+  var filteredHistory = [];
+  if (filter) {
+    for(let i = history.length - 1; i >= 0; i--) {
+      if (i == history.length - 1 || isContinuousDay(history[i].begTime, history[i + 1].begTime)) {
+        filteredHistory.unshift(history[i]);
+        continue;
+      }
+      break;
+    }
+  } else {
+    filteredHistory = history;
+  }
+  filteredHistory.forEach((item) => {
     // 每日打卡情况
     const { begTime, endTime, workTimeInMinutes } = item;
     const date = (begTime || endTime).toLocaleDateString(undefined, {
@@ -126,18 +143,18 @@ function processDingTalkWorktime(content, worktimePerDay) {
     );
   });
 
-  const totalWorkTimeInMinutes = history.reduce(
+  const totalWorkTimeInMinutes = filteredHistory.reduce(
     (acc, cur) => acc + cur.workTimeInMinutes,
     0
   );
   const totalWorkTimeFormated = formatMinutes(totalWorkTimeInMinutes);
-  const needWorkTimeInMinutes = worktimePerDay * 60 * history.length;
+  const needWorkTimeInMinutes = worktimePerDay * 60 * filteredHistory.length;
   Q("#label_total").innerHTML = `${totalWorkTimeFormated}/${formatMinutes(
     needWorkTimeInMinutes
-  )}(共${history.length}天)`;
+  )}(共${filteredHistory.length}天)`;
   const diff = needWorkTimeInMinutes - totalWorkTimeInMinutes;
   Q("#label_need").innerHTML = `${formatMinutes(diff)}`;
-  const lastDay = history[history.length - 1];
+  const lastDay = filteredHistory[filteredHistory.length - 1];
   const showRecommend = lastDay && !lastDay.endTime;
   Q("#left_wrap").style.display = showRecommend ? "" : "none";
   if (showRecommend) {
@@ -184,6 +201,13 @@ function isSameDay(date1, date2) {
   );
 }
 
+/** 是否为相邻天 */
+function isContinuousDay(date1, date2) {
+  if (!date1 || !date2) return false;
+  var newDate = new Date(date1.getTime() + 24 * 60 * 60 * 1000);
+  return isSameDay(newDate, date2);
+}
+
 function formatMilliSeconds(milliseconds, full) {
   // 如果大于1小时,则显示小时和分钟
   if (milliseconds > 60 * 60 * 1000) {
@@ -211,5 +235,5 @@ function formatMinutes(minutes) {
 }
 
 function formatTime(date) {
-  return date ? date.toLocaleTimeString() : "无";
+  return date ? date.toLocaleTimeString() : "未打卡";
 }
