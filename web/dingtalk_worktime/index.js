@@ -153,7 +153,7 @@ function processDingTalkWorktime(content, worktimePerDay, filter) {
     needWorkTimeInMinutes
   )}(共${filteredHistory.length}天)`;
   const diff = needWorkTimeInMinutes - totalWorkTimeInMinutes;
-  Q("#label_need").innerHTML = `${formatMinutes(diff)}`;
+  Q("#label_need").innerHTML = `${formatMinutes(Math.max(0, diff))}`;
   const lastDay = filteredHistory[filteredHistory.length - 1];
   const showRecommend = lastDay && !lastDay.endTime;
   Q("#left_wrap").style.display = showRecommend ? "" : "none";
