@@ -1,3 +1,7 @@
+const LOCAL_STORAGE_KEY = {
+  DINGTALK_CFG: "DINGTALK_CFG",
+};
+let hasNotificationPermission = false;
 function Q(selector) {
   return document.querySelector(selector);
 }
@@ -11,7 +15,14 @@ const tooltipTriggerList = document.querySelectorAll(
 const tooltipList = [...tooltipTriggerList].map(
   (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
 );
-
+var localCfg = localStorage.getItem(LOCAL_STORAGE_KEY.DINGTALK_CFG);
+if (localCfg) {
+  localCfg = JSON.parse(localCfg);
+  Q("#input_dingtalk").value = localCfg.dingtalk;
+  Q("#input_worktime_per_day").value = localCfg.worktime_per_day;
+  Q("#switch_filter").checked = localCfg.filter;
+  this.processDingTalkInput();
+}
 // 监听 Q("#input_dingtalk") 文本变化
 Q("#input_dingtalk").addEventListener("input", function () {
   processDingTalkInput();
@@ -40,7 +51,6 @@ Q("#btn_read_clipboard").addEventListener("click", function () {
       addStatus("无法读取剪贴板内容：" + err, "danger");
     });
 });
-let hasNotificationPermission = false;
 function updateNotificationPermission() {
   hasNotificationPermission =
     window.Notification && Notification.permission === "granted";
@@ -53,7 +63,16 @@ function updateNotificationPermission() {
     });
   }
 }
+function setLocalCfg() {
+  var cfg = {
+    dingtalk: Q("#input_dingtalk").value,
+    worktime_per_day: Q("#input_worktime_per_day").value,
+    filter: Q("#switch_filter").checked,
+  };
+  localStorage.setItem(LOCAL_STORAGE_KEY.DINGTALK_CFG, JSON.stringify(cfg));
+}
 function processDingTalkInput() {
+  setLocalCfg();
   updateNotificationPermission();
   processDingTalkWorktime(
     Q("#input_dingtalk").value,
