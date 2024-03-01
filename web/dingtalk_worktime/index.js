@@ -19,7 +19,7 @@ if (localCfg) {
   Q("#input_dingtalk").value = localCfg.dingtalk;
   Q("#input_worktime_per_day").value = localCfg.worktime_per_day;
   Q("#switch_filter").checked = localCfg.filter;
-  Q("#input_worktime_begin").value = localCfg.worktime_begin || "09:00";
+  Q("#input_worktime_begin").value = localCfg.worktime_begin || "08:30";
   Q("#input_alert_forward").value = localCfg.alert_forward || 5;
   this.processDingTalkInput();
 }
