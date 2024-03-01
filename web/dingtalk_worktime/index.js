@@ -1,12 +1,8 @@
 const LOCAL_STORAGE_KEY = {
   DINGTALK_CFG: "DINGTALK_CFG",
 };
-let hasNotificationPermission = false;
 var needEndTime = null;
 var hasNotified = false;
-function Q(selector) {
-  return document.querySelector(selector);
-}
 setInterval(() => {
   updateTimer();
 }, 1000);
@@ -24,6 +20,7 @@ if (localCfg) {
   Q("#input_worktime_per_day").value = localCfg.worktime_per_day;
   Q("#switch_filter").checked = localCfg.filter;
   Q("#input_worktime_begin").value = localCfg.worktime_begin || "09:00";
+  Q("#input_alert_forward").value = localCfg.alert_forward || 5;
   this.processDingTalkInput();
 }
 // 监听 Q("#input_dingtalk") 文本变化
@@ -37,6 +34,9 @@ Q("#switch_filter").addEventListener("change", function () {
   processDingTalkInput();
 });
 Q("#input_worktime_begin").addEventListener("input", function () {
+  processDingTalkInput();
+});
+Q("#input_alert_forward").addEventListener("input", function () {
   processDingTalkInput();
 });
 Q("#btn_read_clipboard").addEventListener("click", function () {
@@ -57,24 +57,14 @@ Q("#btn_read_clipboard").addEventListener("click", function () {
       addStatus("无法读取剪贴板内容：" + err, "danger");
     });
 });
-function updateNotificationPermission() {
-  hasNotificationPermission =
-    window.Notification && Notification.permission === "granted";
-  if (window.Notification && Notification.permission !== "granted") {
-    Notification.requestPermission(function (status) {
-      hasNotificationPermission = status === "granted";
-      if (!hasNotificationPermission) {
-        addStatus("无法获取通知权限", "warning");
-      }
-    });
-  }
-}
+
 function setLocalCfg() {
   var cfg = {
     dingtalk: Q("#input_dingtalk").value,
     worktime_per_day: Q("#input_worktime_per_day").value,
     filter: Q("#switch_filter").checked,
     worktime_begin: Q("#input_worktime_begin").value,
+    alert_forward: Q("#input_alert_forward").value,
   };
   localStorage.setItem(LOCAL_STORAGE_KEY.DINGTALK_CFG, JSON.stringify(cfg));
 }
@@ -85,7 +75,8 @@ function processDingTalkInput() {
     Q("#input_dingtalk").value,
     Q("#input_worktime_per_day").value,
     Q("#switch_filter").checked,
-    Q("#input_worktime_begin").value
+    Q("#input_worktime_begin").value,
+    Q("#input_alert_forward").value
   );
 }
 
@@ -95,7 +86,13 @@ function addStatus(message) {
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
 }
-function processDingTalkWorktime(content, worktimePerDay, filter, reqBegin) {
+function processDingTalkWorktime(
+  content,
+  worktimePerDay,
+  filter,
+  reqBegin,
+  alertForward
+) {
   needEndTime = null;
   clearStatus();
   const matches = content.matchAll(
@@ -185,7 +182,9 @@ function processDingTalkWorktime(content, worktimePerDay, filter, reqBegin) {
         ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})`
         : "";
     addStatus(
-      `[${date}] ${formatTime(begTime)}<span class="${realBegTime != begTime ? "text-danger" : ""}">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
+      `[${date}] ${formatTime(begTime)}<span class="${
+        realBegTime != begTime ? "text-danger" : ""
+      }">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
     );
   });
 
@@ -209,21 +208,36 @@ function processDingTalkWorktime(content, worktimePerDay, filter, reqBegin) {
       dateStyle: "short",
       timeStyle: "short",
     })}`;
+    alerTime = new Date(
+      lastDay.begTime.getTime() + diff * 60 * 1000 - alertForward * 60 * 1000
+    );
+    Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString()}`;
     updateTimer();
     // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
   }
 }
+var hasNotifiedAlert = false;
 function updateTimer() {
   if (needEndTime) {
     const leftTime = needEndTime.getTime() - Date.now();
+    const leftTimeAlert = alerTime.getTime() - Date.now();
     if (leftTime > 0) {
       hasNotified = false;
-      Q(
-        "#label_off_duty"
-      ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
-        leftTime,
-        true
-      )} 后提醒</span>`;
+      if (leftTimeAlert == leftTime) {
+        Q(
+          "#label_off_duty"
+        ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+          leftTime,
+          true
+        )} 后提醒</span>`;
+      } else {
+        Q(
+          "#label_off_duty"
+        ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+          leftTime,
+          true
+        )} 后下班</span>`;
+      }
     } else {
       Q(
         "#label_off_duty"
@@ -233,66 +247,37 @@ function updateTimer() {
       if (!hasNotified) {
         hasNotified = true;
         new Notification(
-          `下班打卡时间到了: ${needEndTime.toLocaleTimeString()}`,
+          `下班打卡时间到了: ${needEndTime.toLocaleTimeString(undefined, {
+            timeStyle: "short",
+          })}`,
           {
             icon: "./favicon.png",
           }
         );
       }
     }
-  }
-}
 
-/**
- * 是否为同一天
- * @param {Date} date1
- * @param {Date} date2
- * @returns
- */
-function isSameDay(date1, date2) {
-  if (!date1 || !date2) return false;
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
-}
+    if (leftTimeAlert == leftTime || leftTime <= 0) {
+      Q("#label_off_duty_alert").innerHTML = "";
+      return;
+    }
 
-/** 是否为相邻天 */
-function isContinuousDay(date1, date2) {
-  if (!date1 || !date2) return false;
-  var newDate = new Date(date1.getTime() + 24 * 60 * 60 * 1000);
-  return isSameDay(newDate, date2);
-}
-
-function formatMilliSeconds(milliseconds, full) {
-  // 如果大于1小时,则显示小时和分钟
-  if (milliseconds > 60 * 60 * 1000) {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    if (!full) {
-      return `${hours}小时${minutes}分钟`;
+    if (leftTimeAlert > 0) {
+      hasNotifiedAlert = false;
+      Q(
+        "#label_off_duty_alert"
+      ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+        leftTimeAlert,
+        true
+      )} 后提醒</span>`;
     } else {
-      const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-      return `${hours}小时${minutes}分钟${seconds}秒`;
+      Q("#label_off_duty_alert").innerHTML = "";
+      if (!hasNotifiedAlert) {
+        hasNotifiedAlert = true;
+        new Notification(`还有 ${formatMilliSeconds(leftTime)} 下班！`, {
+          icon: "./favicon.png",
+        });
+      }
     }
   }
-  // 如果大于1分钟，则显示分钟和秒数
-  if (milliseconds > 60 * 1000) {
-    const minutes = Math.floor(milliseconds / (1000 * 60));
-    const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-    return `${minutes}分钟${seconds}秒`;
-  }
-  // 否则，直接显示秒数
-  return `${Math.floor(milliseconds / 1000)}秒`;
-}
-
-function formatMinutes(minutes) {
-  return formatMilliSeconds(minutes * 60 * 1000);
-}
-
-function formatTime(date) {
-  return date
-    ? date.toLocaleTimeString(undefined, { timeStyle: "short" })
-    : "未打卡";
 }
