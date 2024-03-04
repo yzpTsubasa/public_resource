@@ -80,8 +80,8 @@ function processDingTalkInput() {
   );
 }
 
-function addStatus(message) {
-  Q("#status_wrapper").innerHTML += `<p>${message}</p>`;
+function addStatus(message, type = "secondary") {
+  Q("#status_wrapper").innerHTML += `<p class="text-${type}">${message}</p>`;
 }
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
@@ -226,14 +226,14 @@ function updateTimer() {
       if (leftTimeAlert == leftTime) {
         Q(
           "#label_off_duty"
-        ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+        ).innerHTML = `<span class="text-info">将在 ${formatMilliSeconds(
           leftTime,
           true
         )} 后提醒</span>`;
       } else {
         Q(
           "#label_off_duty"
-        ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+        ).innerHTML = `<span class="text-info">将在 ${formatMilliSeconds(
           leftTime,
           true
         )} 后下班</span>`;
@@ -266,7 +266,7 @@ function updateTimer() {
       hasNotifiedAlert = false;
       Q(
         "#label_off_duty_alert"
-      ).innerHTML = `<span class="text-danger">将在 ${formatMilliSeconds(
+      ).innerHTML = `<span class="text-info">将在 ${formatMilliSeconds(
         leftTimeAlert,
         true
       )} 后提醒</span>`;
