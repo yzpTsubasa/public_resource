@@ -181,11 +181,15 @@ function processDingTalkWorktime(
       begTime && endTime
         ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})`
         : "";
-    addStatus(
-      `[${date}] ${formatTime(begTime)}<span class="${
-        realBegTime != begTime ? "text-danger" : ""
-      }">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
-    );
+    if (realBegTime != begTime) {
+      addStatus(
+        `[${date}] ${formatTime(begTime)}<span class="text-danger">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
+      );
+    } else {
+      addStatus(
+        `[${date}] ${formatTime(begTime)}~${formatTime(endTime)} ${total}`
+      );
+    }
   });
 
   const totalWorkTimeInMinutes = filteredHistory.reduce(
