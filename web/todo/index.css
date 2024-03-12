@@ -36,6 +36,14 @@ img {
     outline: dashed 1px gray;
 }
 
+.todo-list > div > a {
+    visibility: hidden;
+}
+
+.todo-list > div:hover > a {
+    visibility: inherit;
+}
+
 .todo-list {
     padding: .5rem;
 }

@@ -155,7 +155,7 @@ function updateTodo(todo) {
     Q(".todo-list").appendChild(element);
   }
   Q(`.todo-list input[data-id="${todo.id}"]`).onchange = onTodoChange;
-  Q(`.todo-list label[data-id="${todo.id}"]`).onclick = onTodoEdit;
+  Q(`.todo-list label[data-id="${todo.id}"]`).ondblclick = onTodoEdit;
 }
 
 Q("#btn_remove_done").onclick = function() {
