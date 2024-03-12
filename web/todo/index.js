@@ -20,6 +20,9 @@ Q("body").onclick = function(event) {
     previewDataURL(event.target.src);
   }
 };
+Q("#btn-reset").onclick = function(event) {
+  Q("#input-todo").innerHTML = "";
+};
 
 function previewDataURL (content) {
   var string = content
