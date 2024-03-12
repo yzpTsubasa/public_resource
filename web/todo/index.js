@@ -114,6 +114,7 @@ function onTodoChange(event) {
   const todo = todoList.find((v) => v.id == input.dataset.id);
   if (todo) {
     todo.done = input.checked;
+    updateTodo(todo);
     onListChanged();
   }
 }
@@ -128,6 +129,7 @@ function onTodoEdit(event) {
   }
   if (editingTodo == todo) {
     editingTodo = null;
+    Q("#input-todo").innerHTML = "";
     return;
   }
   if (todo) {
@@ -150,11 +152,13 @@ function onRemoveTodo(event) {
 
 function updateTodo(todo) {
   const elementString = `
-  <div class="form-check form-control-sm" id="todo-wrapper-${todo.id}">
-    <input class="form-check-input" type="checkbox" ${todo.done ? "checked" : ""} data-id=${todo.id}>
-    <label class="form-check-label" data-id=${todo.id}>
-      ${todo.html}
-    </label>
+  <div class="shadow p-2 bg-body-tertiary rounded" style="margin-bottom: 5px; display: flex; align-items: center;justify-content: space-between;" id="todo-wrapper-${todo.id}" data-id=${todo.id}>
+    <div class="form-check form-control-lg" style="display: flex; align-items: center; gap: 10px; color: ${todo.done ? "gray" : "black"}; text-decoration: ${todo.done ? "line-through" : "none"}">
+      <input class="form-check-input" type="checkbox" ${todo.done ? "checked" : ""} data-id=${todo.id}>
+      <label class="form-check-label" data-id=${todo.id}>
+        ${todo.html}
+      </label>
+    </div>
     <button type="button" class="btn-close" data-id=${todo.id}></button>
   </div>
   `;
@@ -173,7 +177,7 @@ function updateTodo(todo) {
   }
   Q(`.todo-list input[data-id="${todo.id}"]`).onchange = onTodoChange;
   Q(`.todo-list .btn-close[data-id="${todo.id}"]`).onclick = onRemoveTodo;
-  Q(`.todo-list label[data-id="${todo.id}"]`).ondblclick = onTodoEdit;
+  element.ondblclick = onTodoEdit;
 }
 
 Q("#btn_remove_done").onclick = function() {

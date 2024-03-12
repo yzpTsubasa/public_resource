@@ -37,17 +37,14 @@ img {
 }
 
 .todo-list > div.editing {
-    outline: dashed 1px gray;
+    outline: dashed 2px #0d6efd;
 }
 
-.todo-list > div > .btn-close {
+.todo-list > div .btn-close {
     visibility: hidden;
-    position: absolute;
-    top: 0;
-    right: 0;
 }
 
-.todo-list > div:hover > .btn-close {
+.todo-list > div:hover .btn-close {
     visibility: inherit;
 }
 
