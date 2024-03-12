@@ -132,6 +132,17 @@ function onTodoEdit(event) {
   }
 }
 
+function onRemoveTodo(event) {
+  const input = event.currentTarget;
+  const todoIdx = todoList.findIndex((v) => v.id == input.dataset.id);
+  if (todoIdx != -1) {
+    const todo = todoList[todoIdx];
+    Q(`#todo-wrapper-${todo.id}`)?.remove();
+    todoList.splice(todoIdx, 1);
+    onListChanged();
+  }
+}
+
 function updateTodo(todo) {
   const elementString = `
   <div class="form-check form-control-sm" id="todo-wrapper-${todo.id}">
@@ -139,6 +150,7 @@ function updateTodo(todo) {
     <label class="form-check-label" data-id=${todo.id}>
       ${todo.html}
     </label>
+    <button type="button" class="btn-close" data-id=${todo.id}></button>
   </div>
   `;
   // Create a new DOMParser
@@ -155,6 +167,7 @@ function updateTodo(todo) {
     Q(".todo-list").appendChild(element);
   }
   Q(`.todo-list input[data-id="${todo.id}"]`).onchange = onTodoChange;
+  Q(`.todo-list .btn-close[data-id="${todo.id}"]`).onclick = onRemoveTodo;
   Q(`.todo-list label[data-id="${todo.id}"]`).ondblclick = onTodoEdit;
 }
 

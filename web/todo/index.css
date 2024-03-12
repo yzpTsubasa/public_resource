@@ -32,15 +32,22 @@ img {
     margin: auto;
 }
 
+.todo-list > div {
+    position: relative;
+}
+
 .todo-list > div.editing {
     outline: dashed 1px gray;
 }
 
-.todo-list > div > a {
+.todo-list > div > .btn-close {
     visibility: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
-.todo-list > div:hover > a {
+.todo-list > div:hover > .btn-close {
     visibility: inherit;
 }
 
