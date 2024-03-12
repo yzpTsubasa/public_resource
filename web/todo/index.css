@@ -18,12 +18,10 @@ body {
     color: gray; 
 }
 
-#input-todo img, .todo-list img {
-    max-height: 1rem;
-}
-
-#input-todo img:hover, .todo-list img:hover {
-    max-height: none;
+img {
+    cursor: pointer;
+    max-height: 5rem;
+    min-width: 5rem;
 }
 
 .card {

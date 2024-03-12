@@ -15,6 +15,20 @@ Q("body").addEventListener("keydown", (e) => {
 });
 Q("#btn_add").onclick = addCurrentTodo;
 Q("#btn_all_done").onclick = makeAllDone;
+Q("body").onclick = function(event) {
+  if (event.target.tagName == "IMG") {
+    previewDataURL(event.target.src);
+  }
+};
+
+function previewDataURL (content) {
+  var string = content
+  var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
+  var x = window.open()
+  x.document.open()
+  x.document.write(iframe)
+  x.document.close()
+}
 
 const LOCAL_STORAGE_KEY = {
   TODO_CFG: "TODO_CFG",
@@ -120,7 +134,7 @@ function onTodoEdit(event) {
 
 function updateTodo(todo) {
   const elementString = `
-  <div class="form-check form-control-md" id="todo-wrapper-${todo.id}">
+  <div class="form-check form-control-sm" id="todo-wrapper-${todo.id}">
     <input class="form-check-input" type="checkbox" ${todo.done ? "checked" : ""} data-id=${todo.id}>
     <label class="form-check-label" data-id=${todo.id}>
       ${todo.html}
