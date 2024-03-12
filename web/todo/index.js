@@ -97,6 +97,8 @@ function updateProgress() {
   let progress = todoList.length ? (todoList.reduce((acc, v) => (acc + (v.done ? 1 : 0)), 0) / todoList.length) : 1;
   progress = (progress * 100).toFixed();
   Q(".progress-bar").style.width = Q(".progress-bar").innerText = `${progress}%`;
+  const favicon = progress == 100 ? "favicon.png" : "favicon@badge.png";
+  Q(`link[type="image/x-icon"]`).href = favicon;
 }
 
 function updateTodoList() {
