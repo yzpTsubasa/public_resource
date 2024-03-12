@@ -120,7 +120,7 @@ function onTodoEdit(event) {
 
 function updateTodo(todo) {
   const elementString = `
-  <div class="form-check form-control-lg" id="todo-wrapper-${todo.id}">
+  <div class="form-check form-control-md" id="todo-wrapper-${todo.id}">
     <input class="form-check-input" type="checkbox" ${todo.done ? "checked" : ""} data-id=${todo.id}>
     <label class="form-check-label" data-id=${todo.id}>
       ${todo.html}

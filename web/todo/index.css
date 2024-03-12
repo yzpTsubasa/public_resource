@@ -7,7 +7,7 @@ body {
 #input-todo {
     outline: none;
     margin-top: .2rem;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
 
     /* overflow: auto; */
     /* height: 20rem; */
@@ -16,6 +16,14 @@ body {
 #input-todo:empty:before{ 
     content: '输入Todo内容'; 
     color: gray; 
+}
+
+#input-todo img, .todo-list img {
+    max-height: 1rem;
+}
+
+#input-todo img:hover, .todo-list img:hover {
+    max-height: none;
 }
 
 .card {
