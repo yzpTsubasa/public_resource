@@ -1,0 +1,39 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#input-todo {
+    outline: none;
+    margin-top: .2rem;
+    font-size: 1.5rem;
+
+    /* overflow: auto; */
+    /* height: 20rem; */
+}
+
+#input-todo:empty:before{ 
+    content: '输入Todo内容'; 
+    color: gray; 
+}
+
+.card {
+    padding: 1rem;
+}
+
+.card h2 {
+    margin: auto;
+}
+
+.todo-list > div.editing {
+    outline: dashed 1px gray;
+}
+
+.todo-list {
+    padding: .5rem;
+}
+
+.progress-bar {
+    transition: width 0.5s ease-out;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.png">
+    <link rel="stylesheet" href="../libs/bootstrap.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="card" style="width: 25rem;">
+        <h2 class="text-light-emphasis">Todo List</h2>
+        <div class="progress" role="progressbar">
+            <div class="progress-bar" style="width: 0%">0%</div>
+        </div>
+        <div id="input-todo" class="shadow p-3 bg-body-tertiary rounded"></div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" id="btn_add">添加</button>
+            <button type="button" class="btn btn-secondary" id="btn_all_done">完成所有</button>
+            <button type="button" class="btn btn-danger" id="btn_remove_done">清除完成</button>
+        </div>
+        <div class="todo-list"></div>
+    </div>
+    <script src="../libs/bootstrap.bundle.min.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
