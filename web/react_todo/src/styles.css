@@ -1,0 +1,72 @@
+
+#new-item-wrapper {
+  display: flex;
+  border-bottom: solid 1px gray;
+  margin-bottom: 0.2rem;
+}
+
+#new-item-wrapper > div {
+  width: 100%;
+  font-size: 1.5rem;
+  outline: none;
+}
+
+#new-item-wrapper > div:empty:before {
+  content: "输入Todo内容";
+  color: gray;
+}
+
+img {
+    cursor: pointer;
+    max-height: 1.5rem;
+}
+
+.card {
+    padding: 1rem;
+}
+
+.card h2 {
+    margin: auto;
+}
+
+.todo-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.todo-list > div > div {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.todo-list > div .btn-close {
+    visibility: hidden;
+}
+
+.todo-list > div:hover .btn-close {
+    visibility: inherit;
+}
+
+.todo-list {
+    padding: .5rem;
+}
+
+.done-tip {
+    color: grey;;
+}
+
+.done {
+    text-decoration: line-through;
+    color: lightgray;
+}
+
+.sort-group {
+    margin: 1rem 0.2rem;
+}
+
+.edit-group {
+    width: 100%;
+}
