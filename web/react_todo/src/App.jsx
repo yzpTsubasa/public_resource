@@ -56,6 +56,8 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem(LocalStorageKey.REACT_TODO_LIST, JSON.stringify(todoList));
+    const favicon = todoList.every(v => v.done) ? "favicon.png" : "favicon@badge.png";
+    document.querySelector(`link[rel="icon"]`).href = favicon;
   }, [todoList])
   return (
     <div className="card">
