@@ -70,3 +70,7 @@ img {
 .edit-group {
     width: 100%;
 }
+
+summary {
+    color: gray;
+}
