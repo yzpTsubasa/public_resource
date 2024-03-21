@@ -95,9 +95,17 @@ function processDingTalkWorktime(
 ) {
   needEndTime = null;
   clearStatus();
-  const matches = content.matchAll(
+  const matches = Array.from(content.matchAll(
     /(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
-  );
+  )).toSorted((a, b) => {
+    const [hourA, minuteA, typeA, monthA, dayA, yearA] = a.slice(1);
+    const [hourB, minuteB, typeB, monthB, dayB, yearB] = b.slice(1);
+    return yearA - yearB
+      || monthA - monthB
+      || dayA - dayB
+      || hourA - hourB
+      || minuteA - minuteB;
+  });
 
   let begTime;
   let endTime;
