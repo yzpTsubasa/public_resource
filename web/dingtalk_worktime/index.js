@@ -258,14 +258,17 @@ function updateTimer() {
       )})</span>`;
       if (!hasNotified) {
         hasNotified = true;
-        new Notification(
-          `下班打卡时间到了: ${needEndTime.toLocaleTimeString(undefined, {
-            timeStyle: "short",
-          })}`,
-          {
-            icon: "./favicon.png",
-          }
-        );
+        // 如果下班时间和当前时间是同一天，才需要提醒
+        if (isSameDay(needEndTime, new Date())) {
+          new Notification(
+            `下班打卡时间到了: ${needEndTime.toLocaleTimeString(undefined, {
+              timeStyle: "short",
+            })}`,
+            {
+              icon: "./favicon.png",
+            }
+          );
+        }
       }
     }
 
