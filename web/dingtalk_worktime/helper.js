@@ -1,19 +1,19 @@
 let hasNotificationPermission = false;
 function updateNotificationPermission() {
-    hasNotificationPermission =
-      window.Notification && Notification.permission === "granted";
-    if (window.Notification && Notification.permission !== "granted") {
-      Notification.requestPermission(function (status) {
-        hasNotificationPermission = status === "granted";
-        if (!hasNotificationPermission) {
-          addStatus("无法获取通知权限", "warning");
-        }
-      });
-    }
+  hasNotificationPermission =
+    window.Notification && Notification.permission === "granted";
+  if (window.Notification && Notification.permission !== "granted") {
+    Notification.requestPermission(function (status) {
+      hasNotificationPermission = status === "granted";
+      if (!hasNotificationPermission) {
+        addStatus("无法获取通知权限", "warning");
+      }
+    });
   }
+}
 
 function Q(selector) {
-    return document.querySelector(selector);
+  return document.querySelector(selector);
 }
 
 /**
@@ -36,6 +36,35 @@ function isContinuousDay(date1, date2) {
   if (!date1 || !date2) return false;
   var newDate = new Date(date1.getTime() + 24 * 60 * 60 * 1000);
   return isSameDay(newDate, date2);
+}
+
+/** 获取指定日期是这一年的第几周 */
+function getDateWeek(date) {
+  const januaryFirst = new Date(date.getFullYear(), 0, 1);
+  const daysToNextMonday =
+    januaryFirst.getDay() === 1 ? 0 : (7 - januaryFirst.getDay()) % 7;
+  const nextMonday = new Date(
+    date.getFullYear(),
+    0,
+    januaryFirst.getDate() + daysToNextMonday
+  );
+
+  return date < nextMonday
+    ? 52
+    : date > nextMonday
+    ? Math.ceil((date - nextMonday) / (24 * 3600 * 1000) / 7)
+    : 1;
+}
+
+/** 判断两个日期是否为同一周内的日期 */
+function isSameWeek(date1, date2) {
+  if (!date1 || !date2) return false;
+  const year1 = date1.getFullYear();
+  const year2 = date2.getFullYear();
+  if (year1 !== year2) return false;
+  const week1 = getDateWeek(date1);
+  const week2 = getDateWeek(date2);
+  return week1 === week2;
 }
 
 function formatMilliSeconds(milliseconds, full) {

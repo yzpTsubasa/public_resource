@@ -161,13 +161,13 @@ function processDingTalkWorktime(
       isNewDay = false;
     }
   }
-  // 过滤非相邻天数
+  // 过滤非本周的打卡记录
   var filteredHistory = [];
   if (filter) {
     for (let i = history.length - 1; i >= 0; i--) {
       if (
         i == history.length - 1 ||
-        isContinuousDay(history[i].begTime, history[i + 1].begTime)
+        isSameWeek(history[i].begTime, history[i + 1].begTime)
       ) {
         filteredHistory.unshift(history[i]);
         continue;
