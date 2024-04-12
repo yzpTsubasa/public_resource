@@ -223,7 +223,7 @@ function processDingTalkWorktime(
     alerTime = new Date(
       lastDay.begTime.getTime() + diff * 60 * 1000 - alertForward * 60 * 1000
     );
-    Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString()}`;
+    Q("#label_recommend").innerHTML = isSameDay(new Date(), needEndTime) ? needEndTime.toLocaleTimeString() : needEndTime.toLocaleString();
     updateTimer();
     // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
   }
