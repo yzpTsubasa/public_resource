@@ -1,0 +1,36 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: storage_optional
+  data:
+    workspaceFolder: <<CWD>>
+    target: src
+
+- type: shell
+  data:
+    cwd: <<workspaceFolder>>
+    cmd: npx jscpd <<target>> --min-lines 30
+    shell: true
+    encoding: utf-8
+    capture_stdout: true
+    store_key: jscpd_reporter
+
+- type: eval
+  data:
+    code: >
+      this.jscpd_reporter.replace(/ \[(\d+:\d+) - (\d+:\d+)\]/g, function(substring, beg, end) {
+        return `:${beg}-${end}`;
+      })
+    store_print: true
+    store_key: jscpd_reporter_formatted
+
+- type: write_plain
+  data:
+    key: jscpd_reporter_formatted
+    dst: <<AUTOMATOR_SCRATCH>>/jscpd_reporter_formatted.log
+
+- type: eval
+  data:
+    code: this.jscpd_reporter_formatted.replace(/\[\d+m/g, '')
+    store_dst: <<AUTOMATOR_SCRATCH>>/jscpd_reporter.log
+    open_dst: true

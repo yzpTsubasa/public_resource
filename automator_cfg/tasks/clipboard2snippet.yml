@@ -1,0 +1,14 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: 转换剪切板内容为代码片段(clipboard to snippet)
+- type: read_clipboard
+  data:
+    store_key: code
+
+- type: write_clipboard
+  data:
+    code: >
+      this.processPipes(this.code, "splitlines").map(line => '"' + line.replaceAll('"', '\\"') + '"').join(',\n')

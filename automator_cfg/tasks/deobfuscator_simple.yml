@@ -1,0 +1,52 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: env_optional
+  data:
+    OBFUSCATED_FILE: 
+
+- type: read_plain
+  data:
+    src: <<OBFUSCATED_FILE>>
+    store_key: obfuscated_content
+- type: truncate_all
+  data:
+    key: obfuscated_content
+    pattern: var (\S+) = (\[[\s\S]+?\]);
+    store_key: matched
+
+- type: retrieve
+  data:
+    key: matched.0.0
+    store_key: key
+    store_print: true
+
+- type: eval
+  data:
+    code: <<matched.0.1>>
+    store_key: val
+    store_print: true
+
+- type: print
+  data:
+    key: val.length
+
+
+- type: eval
+  data:
+    code: >
+      (() => {
+        const newKey = "yzp_xxx_yyy_zzz";
+        const content = this.obfuscated_content.replaceAll(this.key, newKey);
+        const result = content.replace(/yzp_xxx_yyy_zzz\[([xX0-9a-fA-F]+)\]/g, (substring, index) => {
+          index = +index;
+          const real = this.val[index].replaceAll("\\", "\\\\");
+          const hasDoubleQuote = real.indexOf("\"") != -1;
+          const hasSingleQuote = real.indexOf("\'") != -1;
+          const hasNewline = real.match(/\r\n|\n\r|\n|\r/);
+          let char = (hasNewline || (hasSingleQuote && hasDoubleQuote)) ? "`" : hasDoubleQuote ? "'" : "\"";
+          return char + real + char;
+        })
+        return result;
+      })()
+    store_dst: <<OBFUSCATED_FILE>>

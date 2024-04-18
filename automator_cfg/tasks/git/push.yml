@@ -1,0 +1,53 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: git推送
+- type: env_optional
+  data:
+    URL: ""
+    WORKSPACE_FOLDER: <<CWD>>
+
+- type: shell
+  data:
+    cmd: git branch
+    cwd: <<WORKSPACE_FOLDER>>
+    capture_stdout: true
+    store_key: branch
+    store_trim: true
+
+- type: eval
+  data:
+    code: this.branch.replace("* ", "")
+    store_key: branch
+    store_print: true
+
+- type: shell
+  data:
+    cmd: git remote
+    cwd: <<WORKSPACE_FOLDER>>
+    capture_stdout: true
+    store_key: remote
+    store_trim: true
+    store_print: true
+
+- type: shell
+  if_false: remote
+  data:
+    cmd: git remote add origin <<URL>>
+    cwd: <<WORKSPACE_FOLDER>>
+
+- type: shell
+  data:
+    cmd: git remote
+    cwd: <<WORKSPACE_FOLDER>>
+    capture_stdout: true
+    store_key: remote
+    store_trim: true
+    store_print: true
+
+- type: shell
+  data:
+    cmd: git push -u <<remote>> <<branch>>
+    cwd: <<WORKSPACE_FOLDER>>

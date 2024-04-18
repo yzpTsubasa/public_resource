@@ -1,0 +1,36 @@
+- type: print
+  data:
+    content: starting...
+
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: <<WORKSPACE_FOLDER>>
+
+- type: files
+  data:
+    src: <<WORKSPACE_FOLDER>>/scripts/config.*.ts
+    store_key: config_files
+
+- type: select
+  data:
+    content: <<config_files|sort("-ctime")>>
+    preview_handler: (val, idx, arr) => { return val.substring(val.lastIndexOf("/") + 1).replace("config.", "").replace(".ts", ""); }
+    store_key: selected_config_file
+
+- type: eval
+  data:
+    code: this.selected_config_file.substring(this.selected_config_file.indexOf(".") + 1, this.selected_config_file.lastIndexOf("."))
+    store_key: MINI_PUB_NAME
+
+
+- type: which
+  required: true
+  data:
+    target: egret
+    store_key: EGRET_CMD
+
+- type: shell
+  title: 开始编译新的代码版本
+  data:
+    cmd: "<<EGRET_CMD>> publish --target <<MINI_PUB_NAME>> --version nores"
+    cwd: "<<WORKSPACE_FOLDER>>"

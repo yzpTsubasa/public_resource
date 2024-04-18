@@ -1,0 +1,201 @@
+- type: env_optional
+  raw: true
+  data:
+    APPID_USERNAME_PASSWORD:
+    OAUTH_LOGIN_URL: https://publisher.g123.jp/oauth2/login
+    PROJECTS_URL: https://i19n-api.g123.jp/api/v1/games/<<APPID>>/projects
+    TASKS_URL: https://i19n-api.g123.jp/api/v1/games/<<APPID>>/text-tasks?page=1&status=all
+    REQUEST_TASK_URL: https://i19n-api.g123.jp/api/v1/text-tasks/<<TASK_ID>>
+    DELETE_TASK_URL: https://i19n-api.g123.jp/api/v1/text-tasks/<<TASK_ID>>
+    SOURCE_URL: https://i19n-api.g123.jp/api/v1/games/<<APPID>>/text-sources?textTaskId=<<TASK_ID>>
+    REMOVE_TASK_IDS:
+    REMOVE_ALL: false
+
+- type: eval
+  data:
+    code: >
+      (() => {
+        var key = "APPID_USERNAME_PASSWORD";
+        var value = this[key];
+        var keys = key.split("_");
+        var values = value.split(" ");
+        keys.forEach((key, idx) => {
+          this[key] = values[idx];
+        })
+      })()
+
+- type: which
+  data:
+    target: phantomjs
+    store_key: PHANTOMJS
+
+- type: assert
+  data:
+    key:
+      - APPID
+      - USERNAME
+      - PASSWORD
+      - OAUTH_LOGIN_URL
+      - PROJECTS_URL
+      - TASKS_URL
+      - REQUEST_TASK_URL
+      - DELETE_TASK_URL
+      - SOURCE_URL
+      - PHANTOMJS
+
+- type: storage
+  data:
+    get_oauth_login_code_file: <<AUTOMATOR_SCRATCH>>/translation_split/get_oauth_login_code.js
+- type: write_plain
+  data:
+    content: > 
+      var LOGIN_CALLBACK_CODE = "";
+      var leftUrlChangedTimes = 2;
+      var page = require("webpage").create();
+
+      page.onAlert=function(msg){};
+      page.onPrompt=function(msg,defaultVal){};
+      page.onConfirm=function(msg){};
+      page.onConsoleMessage=function(msg,lineNum,sourceId){};
+      page.onInitialized = function() {};
+      page.onUrlChanged = function(url) {};
+      page.onLoadStarted = function() {};
+      page.onLoadFinished = function () {};
+      page.onNavigationRequested=function(url,type,willNavigate,main){};
+      page.onResourceRequested = function(request) {};
+      page.onResourceReceived = function(response) {};
+      page.onResourceError = function(error) {};
+      page.onResourceTimeout = function(request) {};
+      page.onError = function(msg, trace) {};
+      phantom.onError = function(msg, trace) {};
+
+      page.onUrlChanged = function (url) {
+        leftUrlChangedTimes--;
+        var matched = url.match(/[\?&]code=([^&]*)[&$]/);
+        if (matched) {
+          LOGIN_CALLBACK_CODE = matched[1];
+        }
+      };
+
+      page.onLoadFinished = function () {
+        if (leftUrlChangedTimes <= 0) {
+          console.log(LOGIN_CALLBACK_CODE);
+          phantom.exit();
+        }
+      };
+
+      page.open("<<OAUTH_LOGIN_URL|format>>", function (status) {
+        page.evaluate(function () {
+          document.querySelector("#username").value = "<<USERNAME>>";
+          document.querySelector("#password").value = "<<PASSWORD>>";
+          document.querySelector("form").submit();
+        });
+      });
+    dst: <<get_oauth_login_code_file>>
+- type: loop
+  retry: 3
+  data:
+    content: [1]
+    commands:
+      # 获取 code
+      - type: shell
+        data:
+          cmd: 
+            - <<PHANTOMJS>>
+            - --output-encoding=gbk
+            - <<get_oauth_login_code_file>>
+          capture_stdout: true
+          store_trim: true
+          store_key: oauth_login_code
+          store_print: true
+
+      ## 获取 access_token
+      - type: request
+        data:
+          src: <<OAUTH_LOGIN_URL|format>>
+          options: 
+            method: POST
+            json:
+              code: <<oauth_login_code>>
+          store_key: token_data
+          
+
+- type: env_optional
+  data:
+    Authorization: <<token_data.token_type>> <<token_data.access_token>>
+
+- type: request
+  data:
+    quiet: true
+    src: <<TASKS_URL|format>>
+    options: 
+      headers:
+        Authorization: <<Authorization>>
+    parse_type: json
+    store_key: tasks
+
+- type: loop
+  show_progress: true
+  data:
+    key: tasks.data
+    value_mapping: task
+    tip_key: task.id
+    commands:
+      - type: storage
+        data:
+          TASK_ID: <<task.id>>
+      - type: continue
+        when: this.REMOVE_TASK_IDS.indexOf(this.TASK_ID) == -1 && !this.REMOVE_ALL
+      - type: request
+        when: this.task.status == "duplicate"
+        data:
+          src: <<DELETE_TASK_URL|format>>
+          quiet: true
+          options: 
+            method: DELETE
+            headers:
+              Authorization: <<Authorization>>
+      - type: continue
+        when: this.task.status == "duplicate"
+      - type: request
+        data:
+          src: <<SOURCE_URL|format>>
+          quiet: true
+          options: 
+            method: GET
+            headers:
+              Authorization: <<Authorization>>
+          parse_type: json
+          store_key: taskSources
+      - type: loop
+        show_progress: true
+        when: this.taskSources.data.length != 0
+        data:
+          content: <<taskSources.data|chunk>>
+          value_mapping: chunk
+          commands:
+            - type: eval
+              data:
+                code: >
+                  JSON.stringify({sourceIds: this.chunk.map(v => v.id)})
+                store_key: body
+            - type: request
+              data:
+                src: <<SOURCE_URL|format>>
+                quiet: true
+                options: 
+                  method: DELETE
+                  body: <<body>>
+                  headers:
+                    Authorization: <<Authorization>>
+      - type: request
+        data:
+          src: <<SOURCE_URL|format>>
+          quiet: true
+          options: 
+            method: PUT
+            headers:
+              Authorization: <<Authorization>>
+
+              
+    

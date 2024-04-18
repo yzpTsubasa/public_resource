@@ -1,0 +1,26 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: git初始化
+- type: env_optional
+  data:
+    BRANCH: ""
+    WORKSPACE_FOLDER: <<CWD>>
+
+- type: loop
+  show_progress: true
+  data:
+    content:
+      - git init
+      - git checkout -b "<<BRANCH>>"
+      - git add .
+      - git commit -m "init"
+    value_mapping: command
+    tip_key: true
+    commands:
+      - type: shell
+        data:
+          cmd: <<command>>
+          cwd: <<WORKSPACE_FOLDER>>

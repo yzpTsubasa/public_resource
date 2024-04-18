@@ -1,0 +1,62 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: register_search_install_location
+  data:
+    target: "{771FD6B0-FA20-440A-A002-3B3BAC16DC50}_is1"
+    store_key: VSCode_Location
+
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: <<CWD>>
+    COMPILE_CMD: "tsc -b"
+    MAX_TABS: 10
+
+- type: shell
+  data:
+    cmd: <<COMPILE_CMD>>
+    cwd: <<WORKSPACE_FOLDER>>
+    shell: true
+    instant_stdout: true
+    capture_stdout: true
+    store_key: ERROR_LOG
+    ignore_code: true
+    
+
+- type: truncate_all
+  data:
+    content: <<ERROR_LOG|decolor>>
+    pattern: ^(\S+.ts)[\(\:](\d+)[\,\:](\d+)\)?
+    struct: ["file", "line", "character"]
+    remove_duplicate: true
+    flags: m
+    store_key: files
+
+- type: storage
+  data:
+    num: 0
+
+- type: loop
+  show_progress: true
+  data:
+    key: files
+    value_mapping: file
+    tip_key: file.file
+    commands:
+      - type: shell
+        data:
+          cmd: Code -g "<<WORKSPACE_FOLDER>>\<<file.file>>:<<file.line>>:<<file.character>>"
+          cwd: <<VSCode_Location>>
+          shell: true
+      - type: retrieve
+        data:
+          code: this.num + 1
+          store_key: num
+      - type: pause
+        when: this.num >= this.MAX_TABS
+
+      - type: retrieve
+        when: this.num >= this.MAX_TABS
+        data:
+          content: 0
+          store_key: num

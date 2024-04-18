@@ -1,0 +1,54 @@
+- type: print
+  data:
+    content: Starting debug minigame...
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: <<CWD>>
+
+# 支付宝小游戏
+- type: first_exist
+  ignore_error: true
+  data:
+    src: <<WORKSPACE_FOLDER>>/egret.mygame.js
+    store_key: is_alipay_game
+
+- type: loop
+  if_true: is_alipay_game
+  data:
+    content: [1]
+    commands:
+      - type: read_cfg
+        data:
+          src: <<WORKSPACE_FOLDER>>/project.config.json
+          store_key: project_config
+      - type: select
+        data:
+          content:
+            - minidev preview -a <<project_config.appid>>
+            - minidev remote-debug -a <<project_config.appid>>
+          store_key: cmd
+      - type: shell
+        data:
+          cwd: <<WORKSPACE_FOLDER>>
+          cmd: <<cmd>>
+          shell: true
+          encoding: utf8
+
+
+# 美团小游戏
+- type: first_exist
+  ignore_error: true
+  data:
+    src: <<WORKSPACE_FOLDER>>/mgc.config.js
+    store_key: is_meituan_game
+
+- type: loop
+  if_true: is_meituan_game
+  data:
+    content: [1]
+    commands:
+      - type: shell
+        data:
+          cwd: <<WORKSPACE_FOLDER>>
+          cmd: mgc debug
+          shell: true

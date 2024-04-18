@@ -1,0 +1,71 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: <<CWD>>
+    URLS: 
+    PATH_MODE: FULL
+    OPEN_MODE: FILE
+- type: register_search_install_location
+  data:
+    target: "{771FD6B0-FA20-440A-A002-3B3BAC16DC50}_is1"
+    store_key: VSCode_Location
+- type: loop
+  data:
+    delimiter: "\\s+"
+    key: URLS
+    value_mapping: URL
+    commands:
+      - type: eval
+        data: 
+          code: >
+            (() => {
+              if (this.URL.startsWith("//")) {
+                this.URL = "https:" + this.URL;
+              }
+              else if (!this.URL.startsWith("http")) {
+                this.URL = "https://" + this.URL;
+              }
+            })()
+      - type: retrieve
+        when: this.PATH_MODE == "NONE"
+        data:
+          content: <<WORKSPACE_FOLDER>>/<<URL|basename>>
+          store_key: LOCAL_PATH
+      - type: retrieve
+        when: this.PATH_MODE == "PATH"
+        data:
+          content: <<WORKSPACE_FOLDER>>/<<URL|pathname>>
+          store_key: LOCAL_PATH
+      - type: retrieve
+        when: this.PATH_MODE == "FULL"
+        data:
+          content: <<WORKSPACE_FOLDER>>/<<URL|host>>/<<URL|pathname>>
+          store_key: LOCAL_PATH
+      - type: download
+        ignore_error: true
+        data:
+          src: <<URL>>
+          enable_cache: true
+          options: 
+            gzip: true
+            headers:
+              User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+              Referer: <<URL>>
+          dst: <<LOCAL_PATH>>
+
+      - type: shell
+        when: this.OPEN_MODE == "FILE"
+        data:
+          cmd: Code -g "<<LOCAL_PATH>>"
+          cwd: <<VSCode_Location>>
+          shell: true
+
+      - type: shell
+        when: this.OPEN_MODE == "FOLDER"
+        data:
+          cmd: Code -g "<<LOCAL_PATH|dirname>>"
+          cwd: <<VSCode_Location>>
+          shell: true
+

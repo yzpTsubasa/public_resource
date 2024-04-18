@@ -1,0 +1,39 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: vigoo - 打开项目
+- type: read_clipboard
+  data:
+    store_key: APPID
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: 
+    REPOSITORY_URL: 
+- type: register_search_install_location
+  data:
+    target: "{771FD6B0-FA20-440A-A002-3B3BAC16DC50}_is1"
+    store_key: VSCode_Location
+
+- type: first_exist
+  ignore_error: true
+  data:
+    src: <<WORKSPACE_FOLDER>>/<<APPID>>
+    store_key: game_folder
+
+- type: shell
+  if_false: game_folder
+  data:
+    cmd: git clone --single-branch --branch <<APPID>> <<REPOSITORY_URL>> <<WORKSPACE_FOLDER>>/<<APPID>>
+
+- type: shell
+  data:
+    cmd: git pull
+    cwd: <<game_folder>>
+
+- type: shell
+  data:
+    cmd: Code -g "<<WORKSPACE_FOLDER>>/<<APPID>>" -r
+    cwd: <<VSCode_Location>>
+    shell: true

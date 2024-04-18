@@ -1,0 +1,135 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: env_optional
+  data:
+    NEW_BRANCH_CFG:
+    BACKUP: true
+    NEW_BRANCH_ROOT:
+    REVISION:
+- type: eval
+  data:
+    code: >
+      (() => {
+        var parts = this.NEW_BRANCH_CFG.split(",");
+        return [{
+          src: this.NEW_BRANCH_ROOT + parts[0],
+          dst: this.NEW_BRANCH_ROOT + parts[1],
+          comments: "[0] 版本更新",
+          backup: this.BACKUP,
+        }];
+      })()
+    store_key: cfgs
+- type: print
+  data:
+    key:
+      - cfgs
+      - REVISION
+- type: loop
+  data:
+    content: <<cfgs>>
+    value_mapping: true
+    commands:
+      - type: date
+        data:
+          format: YYYYMMDD_hhmmss
+          store_key: formated_now
+          store_print: true
+      - type: shell
+        title: 查看 <<src>>
+        data:
+          cmd: svn info <<src>>
+          capture_stdout: true
+          store_key: src_svn_info
+          parse_type: yaml
+      - type: shell
+        title: 查看 <<dst>>
+        data:
+          cmd: svn info <<dst>>
+          capture_stdout: true
+          store_key: dst_svn_info
+          acceptableErrors: 
+            - "svn: E200009: Could not display info for all targets because some targets don't exist"
+          parse_type: yaml
+      - type: storage
+        data:
+          bak_suffix: .<<formated_now>>.bak
+      - type: shell
+        data:
+          cmd: svn cat <<src>>/resource/js/common.js
+          encoding: utf-8
+          capture_stdout: true
+          store_key: common_js
+      - type: truncate
+        data:
+          key: common_js
+          pattern: 'HG_GLOBAL\.LOCALIZATION_CFG \= ([\s\S]*?\});'
+          store_key: LOCALIZATION_CFG
+          store_trim: true
+      - type: loop
+        if_true: LOCALIZATION_CFG
+        data:
+          content: [1]
+          commands:
+            - type: eval
+              data:
+                code: <<LOCALIZATION_CFG>>
+                store_key: LOCALIZATION_CFG
+            - type: storage
+              data:
+                bak_suffix: .ob<<LOCALIZATION_CFG.projectVer>><<bak_suffix>>
+      - type: loop
+        data:
+          content:
+            - src/src_base/config/ConstVariable.ts
+            - src/module__com/config/ComConfig.ts
+          value_mapping: config_file
+          commands:
+            - type: shell
+              data:
+                cmd: svn cat <<src>>/<<config_file>>
+                encoding: utf-8
+                capture_stdout: true
+                acceptableErrors: 
+                  - "svn: E200009: Could not cat all targets because some targets don't exist"
+                store_key: config_code
+            - type: truncate
+              if_true: config_code
+              data:
+                key: config_code
+                pattern: 'RES_VER *: *number *= *(\d+) *'
+                store_key: RES_VER
+                store_print: true
+      - type: storage
+        if_true: RES_VER
+        data:
+          bak_suffix: .<<RES_VER>><<bak_suffix>>
+      - type: loop
+        if_true: dst_svn_info
+        data:
+          content: [1]
+          commands:
+            - type: shell
+              title: 备份 <<dst>> 到 <<dst>><<bak_suffix>>
+              if_true: backup
+              data:
+                cmd: svn copy <<dst>> <<dst>><<bak_suffix>> -m "[0] 版本备份"
+            - type: shell
+              title: 删除 <<dst>>
+              data:
+                cmd: svn del <<dst>> -m "<<comments>>"
+      - type: eval
+        data:
+          code: >
+            !this.REVISION || this.REVISION == "0"
+          store_key: use_newest_revision
+      - type: shell
+        if_false: use_newest_revision
+        title: 基于 <<REVISION>> 创建 <<dst>>
+        data:
+          cmd: svn copy -r <<REVISION>> <<src>> <<dst>> -m "<<comments>>"
+      - type: shell
+        if_true: use_newest_revision
+        title: 创建 <<dst>>
+        data:
+          cmd: svn copy <<src>> <<dst>> -m "<<comments>>"

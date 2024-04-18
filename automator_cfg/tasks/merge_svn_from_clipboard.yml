@@ -1,0 +1,396 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: select
+  title: 选择合并源
+  data:
+    store_key: src
+    content:
+      - https://svn100.hotgamehl.com/svn/Html5/trunk/DLDL
+      - https://svn100.hotgamehl.com/svn/Html5/trunk/dldl_WX/dldl_bt
+      - https://svn100.hotgamehl.com/svn/Html5/trunk/dldl_WX/dldl_h5_jp
+      - https://svn100.hotgamehl.com/svn/Html5/trunk/dldl_WX/dldl_h5_en
+- type: files
+  data:
+    src: E:\projects\dldl_WX\*\
+    store_key: ALL_BRANCHES
+- type: select
+  title: 选择合并目标
+  data:
+    store_key: dst
+    content: <<ALL_BRANCHES>>
+- type: read_clipboard
+  title: 要合并的版本
+  data:
+    store_key: revisions
+    store_print: true
+
+- type: storage_optional
+  data:
+    dst: E:\projects\dldl_WX\dldl_h5_v114
+    src: https://svn100.hotgamehl.com/svn/Html5/trunk/DLDL
+    revisions: 246074,246650,246795,248736,248949
+    important_pattern: (\.ts|common\.js)$
+
+    for_test: 0
+
+- type: which
+  data:
+    target: TortoiseMerge
+    store_key: TortoiseMerge
+
+- type: shell
+  if_true: for_test
+  title: 清理...
+  data:
+    cmd: svn cleanup
+    cwd: <<dst>>
+
+- type: shell
+  if_true: for_test
+  title: 还原...
+  data:
+    cmd: svn revert -R .
+    cwd: <<dst>>
+
+
+- type: eval
+  data:
+    code: >
+      ("" + $<<revisions>>).split(/[^0-9\-]+/).map(v => {
+          let arr = v.split("-");
+          if (arr.length == 2) {
+              let ret = [];
+              for (let i = +arr[0]; i <= +arr[1]; ++i) {
+                  ret.push("" + i);
+              }
+              return ret;
+          }
+          return v;
+      }).flat().filter(v => v.trim()).sort((a, b) => a - b)
+    store_key: revisions
+    store_print: true
+- type: loop
+  show_progress: true
+  data:
+    key: revisions
+    value_mapping: revision
+    tip_key: true
+    commands:
+      # - type: shell
+      #   data:
+      #     cmd: svn diff <<src>> -c<<revision>> --summarize
+      #     capture_stdout: true
+      #     store_key: svn_diff_info
+      #     store_trim: true
+      # - type: truncate_all
+      #   data:
+      #     key: svn_diff_info
+      #     pattern: ^M +<<src>>\/(.*\.(?:ts|js))$
+      #     store_key: modified_files
+      #     flags: gm
+      #     store_print: true
+      - type: shell
+        title: 合并版本 <<revision>>
+        data:
+          cmd: svn merge <<src>> -c<<revision>> --accept p
+          cwd: <<dst>>
+          capture_stdout: true
+      # - type: shell
+      #   if_false: modified_files.length
+      #   title: 资源合并
+      #   data:
+      #     cmd: svn merge <<src>> -c<<revision>> --accept tf
+      #     cwd: <<dst>>
+      
+      - type: shell
+        data:
+          cmd: svn status --xml
+          cwd: <<dst>>
+          capture_stdout: true
+          store_key: status
+          parse_type: xml
+      - type: eval
+        data:
+          code: >
+            (() => {
+              let ret = {
+                "tree-conflicted": [],
+                "conflicted": [],
+              };
+              let entries = $<<status>>.getElementsByTagName("entry");
+              for (let i = 0, len = entries.length; i < len; ++i) {
+                console.log(i + "/" + len);
+                let entry = entries[i];
+                let wc_status = entry.getElementsByTagName("wc-status")[0];
+                if (wc_status) {
+                  if (wc_status.getAttribute("tree-conflicted")) {
+                    ret["tree-conflicted"].push(entry.getAttribute("path"));
+                  } else if (wc_status.getAttribute("item") === "conflicted") {
+                    ret["conflicted"].push(entry.getAttribute("path"));
+                  }
+                }
+              }
+              return ret;
+            })()
+          store_key: status_analysis
+      - type: loop
+        data:
+          key: status_analysis.tree-conflicted
+          value_mapping: path
+          commands:
+            - type: first_exist
+              data:
+                src: <<dst>>/<<path>>
+                noGlob: true
+                store_print: true
+            # - type: eval
+            #   data:
+            #     code: $<<path>>.match(/<<important_pattern>>/)
+            #     store_key: manual
+            # - type: pause
+            #   if_true: manual
+            #   data:
+            #     prompt: 请先手动解决 <<path>> 的树冲突
+            # - type: continue
+            #   if_true: manual
+            - type: shell
+              title: 自动解决 <<path>> 的树冲突
+              data:
+                cmd: svn resolve <<path>> --accept working
+                cwd: <<dst>>
+                capture_stdout: true
+            - type: print
+              data:
+                content: 自动解决 <<path>> 的树冲突
+                level: 4
+            
+      - type: loop
+        data:
+          key: status_analysis.conflicted
+          value_mapping: path
+          commands:
+            - type: first_exist
+              data:
+                src: <<dst>>/<<path>>
+                noGlob: true
+                store_print: true
+            - type: eval
+              data:
+                code: $<<path>>.match(/<<important_pattern>>/)
+                store_key: manual
+            - type: loop
+              when: $<<manual>> && $<<TortoiseMerge>>
+              data:
+                content:
+                  - 1
+                commands:
+                  - type: first_exist
+                    data:
+                      src: <<dst>>/<<path>>
+                      store_key: merged
+                      # store_print: true
+                  - type: first_exist
+                    data:
+                      src: <<dst>>/<<path>>.working
+                      store_key: mine
+                      # store_print: true
+                  - type: first_exist
+                    data:
+                      src: <<dst>>/<<path>>.merge-left.*
+                      store_key: base
+                      # store_print: true
+                  - type: first_exist
+                    data:
+                      src: <<dst>>/<<path>>.merge-right.*
+                      store_key: theirs
+                      # store_print: true
+                  - type: shell
+                    data:
+                      cmd:
+                        - <<TortoiseMerge>>
+                        - /merged:<<merged>> # E:\projects\dldl_WX\dldl_h5_v114\resource\assets\cfgjson\comstr.json
+                        - /mine:<<mine>> # E:\projects\dldl_WX\dldl_h5_v114\resource\assets\cfgjson\comstr.json.working
+                        - /base:<<base>> # E:\projects\dldl_WX\dldl_h5_v114\resource\assets\cfgjson\comstr.json.merge-left.r250289
+                        - /theirs:<<theirs>> # E:\projects\dldl_WX\dldl_h5_v114\resource\assets\cfgjson\comstr.json.merge-right.r250290
+            # 检查是否还有冲突
+            - type: shell
+              data:
+                cmd: svn status "<<dst>>/<<path>>"
+                capture_stdout: true
+                trim: true
+                store_key: path_status
+            - type: eval
+              data:
+                code: $<<path_status>> && $<<path_status>>[0] === "C"
+                store_key: remain_conflicted
+            - type: print
+              when: $<<manual>> && !$<<remain_conflicted>>
+              data:
+                content: 已解决 <<path>> 的文件冲突
+                level: 3
+            - type: reveal
+              when: $<<manual>> && $<<remain_conflicted>>
+              data:
+                src: <<dst>>/<<path>>
+            - type: pause
+              when: $<<manual>> && $<<remain_conflicted>>
+              data:
+                prompt: 请先解决 <<path>> 的文件冲突
+            - type: continue
+              if_true: manual
+            - type: shell
+              title: 自动解决 <<path>> 的文件冲突 
+              data:
+                cmd: svn resolve <<path>> --accept tf
+                cwd: <<dst>>
+                capture_stdout: true
+            
+
+- type: shell
+  if_true: for_test
+  title: 清理...
+  data:
+    cmd: svn cleanup
+    cwd: <<dst>>
+
+- type: shell
+  if_true: for_test
+  title: 还原...
+  data:
+    cmd: svn revert -R .
+    cwd: <<dst>>
+
+- type: storage
+  data:
+    workspaceFolder: <<dst>>
+
+
+
+- type: storage_optional
+  data:
+    workspaceFolder: E:\projects\dldl_WX\dldl_h5_gat
+    outputFolder: <<AUTOMATOR_SCRATCH>>/merge_analysis/merge_analysis
+    
+- type: storage
+  data:
+
+    filters:
+      assets_ui_dldl_wd: resource\\assets\\ui\\dldl\\wd
+      assets_ui: 
+        O: resource\\assets\\ui
+        X: resource\\assets\\ui\\dldl\\wd
+      assets_ui_web: resource\\assets\\ui_web
+      cardhero: resource\\assets\\cardhero
+      cfgjson: resource\\assets\\cfgjson
+      eui_skins: resource\\eui_skins
+      eui_skins_web: resource\\eui_skins_web
+      assets_other: 
+        O: resource\\assets
+        X: 
+          - resource\\assets\\ui_web
+          - resource\\assets\\cardhero
+          - resource\\assets\\cfgjson
+          - resource\\assets\\ui
+
+    status_map:
+        M: "修改"
+        A: "添加"
+        D: "删除"
+
+- type: date
+  data:
+    format: YYYY-MM-DD-hh-mm
+    store_key: formated_time
+    store_print: true
+
+- type: shell
+  data:
+    cmd: svn diff --summarize
+    cwd: <<workspaceFolder>>
+    capture_stdout: true
+    trim: true
+    store_key: svn_diff_logs
+    store_dst: <<outputFolder>>/版本同步<<formated_time>>.log
+- type: eval
+  data:
+    code: >
+      (() => {
+        let ret = [];
+        ret = $<<svn_diff_logs>>.split(/[\r\n]{1,2}/).map(v => {
+            return  {
+                path: v.substr(8),
+                status_code: v[0],
+                status: $<<status_map>>[v[0]] || " ",
+            };
+        }).sort((a, b) => {
+          return a.status.charCodeAt(0) - b.status.charCodeAt(0);
+        });
+        return ret;
+      })()
+    store_key: svn_diff_infos
+    store_print: true
+- type: remove
+  data:
+    src: <<outputFolder>>/*.yaml
+- type: loop
+  data:
+    key: filters
+    key_mapping: filter_key
+    value_mapping: patterns
+    commands:
+      - type: eval
+        data:
+          code: >
+            (() => {
+              let ret = [];
+              if (typeof $<<patterns>> == "string" || $<<patterns>> instanceof Array) {
+                ret = $<<svn_diff_infos>>.filter(v => [].concat($<<patterns>>).some(pattern => new RegExp(pattern).test(v.path)));
+              } else {
+                ret = $<<svn_diff_infos>>.filter(v => [].concat($<<patterns>>.O).some(pattern => new RegExp(pattern).test(v.path)) && ![].concat($<<patterns>>.X).some(pattern => new RegExp(pattern).test(v.path)));
+              }
+              return ret;
+            })()
+          store_print: true
+          store_key: matched_infos
+
+      - type: eval
+        data:
+          code: >
+            (() => {
+              let ret = {};
+              for (let statusCode in $<<status_map>>) {
+                let status = $<<status_map>>[statusCode];
+                ret[status] = $<<matched_infos>>.filter(v => v.status == status).map(v => v.path);
+              }
+              return ret;
+            })()
+          store_dst: <<outputFolder>>/<<filter_key>>.yaml
+          store_dst_type: yaml
+- type: zip
+  data:
+    src: <<outputFolder>>/*.yaml
+    dst: <<outputFolder>>/版本同步<<formated_time>>.zip
+- type: reveal
+  data:
+    src: <<outputFolder>>/版本同步<<formated_time>>.zip
+    
+- type: print
+  data:
+    content: "准备还原 <<workspaceFolder>> 中的资源文件..."
+    
+- type: shell
+  title: 还原 assets...
+  data:
+    cmd: svn revert -R resource/assets
+    cwd: <<dst>>
+- type: shell
+  title: 还原 eui_skins...
+  data:
+    cmd: svn revert -R resource/eui_skins*
+    cwd: <<dst>>
+- type: shell
+  title: 还原 json...
+  data:
+    cmd: svn revert -R resource/*json
+    cwd: <<dst>>

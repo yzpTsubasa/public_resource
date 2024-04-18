@@ -1,0 +1,14 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: 代码反混淆
+- type: env_optional
+  data:
+    OBFUSCATED_FILE: 
+
+- type: deobfuscate
+  data:
+    src: <<OBFUSCATED_FILE>>
+    store_dst: <<OBFUSCATED_FILE>>
