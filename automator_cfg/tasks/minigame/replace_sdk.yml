@@ -2,54 +2,74 @@
   data:
     INPUT_FILE:
     GAME_FILES:
-- type: truncate_all
+- type: eval
   data:
-    src: <<INPUT_FILE>>
-    pattern: hg_allsdk_channel_(\d+)_(\d+)
-    struct:
-      - APP_ID
-      - SDK_TYPE
-    store_key: target_game
+    code: this.INPUT_FILE.endsWith(".js")
+    store_key: inputFileIsJs
+- type: files
+  if_false: inputFileIsJs
+  data:
+    src: <<INPUT_FILE>>/**/*.js
+    store_key: INPUT_FILES
+- type: retrieve
+  if_true: inputFileIsJs
+  data:
+    content: 
+      - <<INPUT_FILE>>
+    store_key: INPUT_FILES
 - type: loop
   data:
-    content: <<GAME_FILES|split("&")>>
-    value_mapping: game_files
+    key: INPUT_FILES
+    value_mapping: INPUT_FILE
     commands:
-      - type: loop
-        show_progress: true
+      - type: truncate_all
         data:
-          content: <<game_files|split(",")>>
-          value_mapping: game_file
-          tip_key: game_file|dirname|basename
+          src: <<INPUT_FILE>>
+          pattern: hg_allsdk_channel_(\d+)_(\d+)
+          struct:
+            - APP_ID
+            - SDK_TYPE
+          store_key: target_game
+      - type: loop
+        data:
+          content: <<GAME_FILES|split("&")>>
+          value_mapping: game_files
           commands:
-            - type: truncate
+            - type: loop
+              show_progress: true
               data:
-                src: <<game_file>>
-                pattern: 'app:\s*(\d+)'
-                store_key: APP_ID
-                value_type: number
-            - type: truncate
-              data:
-                src: <<game_file>>
-                pattern: 'chn:\s*(\d+)'
-                store_key: SDK_TYPE
-                value_type: number
-            - type: continue
-              when: this.APP_ID != this.target_game[0].APP_ID || this.SDK_TYPE != this.target_game[0].SDK_TYPE
-            - type: shell
-              data:
-                cwd: <<game_file|dirname>>
-                cmd: svn up
-            - type: copy
-              data:
-                src: <<INPUT_FILE>>
-                dst: <<game_file|dirname>>/sdk
-                options:
-                  rename: hg_allsdk_<<APP_ID>>.js
-            - type: reveal
-              data:
-                src: <<game_file|dirname>>/sdk
-            - type: svn_commit
-              data:
-                cwd: <<game_file|dirname>>
-                msg: "[0] 更新sdk <<APP_ID>>_<<SDK_TYPE>>"
+                content: <<game_files|split(",")>>
+                value_mapping: game_file
+                tip_key: game_file|dirname|basename
+                commands:
+                  - type: truncate
+                    data:
+                      src: <<game_file>>
+                      pattern: 'app:\s*(\d+)'
+                      store_key: APP_ID
+                      value_type: number
+                  - type: truncate
+                    data:
+                      src: <<game_file>>
+                      pattern: 'chn:\s*(\d+)'
+                      store_key: SDK_TYPE
+                      value_type: number
+                  - type: continue
+                    when: this.APP_ID != this.target_game[0].APP_ID || this.SDK_TYPE != this.target_game[0].SDK_TYPE
+                  - type: shell
+                    data:
+                      cwd: <<game_file|dirname>>
+                      cmd: svn up
+                  - type: copy
+                    data:
+                      src: <<INPUT_FILE>>
+                      dst: <<game_file|dirname>>/sdk
+                      options:
+                        rename: hg_allsdk_<<APP_ID>>.js
+                  - type: reveal
+                    data:
+                      src: <<game_file|dirname>>/sdk
+                  - type: svn_commit
+                    data:
+                      cwd: <<game_file|dirname>>
+                      msg: "[0] 更新sdk <<APP_ID>>_<<SDK_TYPE>>"
