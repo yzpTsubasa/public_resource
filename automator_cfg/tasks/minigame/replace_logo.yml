@@ -1,0 +1,43 @@
+- type: env_optional
+  data:
+    INPUT_FILE:
+    GAME_FILES:
+
+- type: multi_select
+  data:
+    code: this.GAME_FILES.split("&").map((x) => x.split(",")).flat()
+    store_key: selectedGameFiles
+
+- type: loop
+  data:
+    key: selectedGameFiles
+    value_mapping: game_file
+    commands:
+      - type: first_exist
+        ignore_error: true
+        data:
+          src: <<game_file|dirname>>/logo.png
+          store_key: logo_file
+      - type: continue
+        if_false: logo_file
+      - type: truncate_all
+        data:
+          src: <<game_file|dirname>>/sdk/hg_allsdk_*.js
+          pattern: hg_allsdk_channel_(\d+)_(\d+)
+          struct:
+            - APP_ID
+            - SDK_TYPE
+          store_key: target_game
+      - type: copy
+        data:
+          src: <<INPUT_FILE>>
+          dst: <<logo_file|dirname>>
+          options: 
+            rename: <<logo_file|basename>>
+      - type: reveal
+        data:
+          src: <<logo_file>>
+      - type: svn_commit
+        data:
+          cwd: <<game_file|dirname>>
+          msg: "[0] 更新logo <<target_game.0.APP_ID>>_<<target_game.0.SDK_TYPE>>"
