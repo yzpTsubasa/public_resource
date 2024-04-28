@@ -1,4 +1,4 @@
-# 
+# vigoo/download.yml
 - type: print
   data:
     content: "Starting..."
@@ -65,16 +65,19 @@
         data:
           content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|basename>>
           store_key: LOCAL_PATH
+          store_print: true
       - type: retrieve
         when: this.PATH_MODE == "PATH"
         data:
           content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|pathname>>
           store_key: LOCAL_PATH
+          store_print: true
       - type: retrieve
         when: this.PATH_MODE == "FULL"
         data:
           content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|host>>/<<URL|pathname>>
           store_key: LOCAL_PATH
+          store_print: true
       - type: eval
         data:
           code: |-
