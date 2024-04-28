@@ -63,17 +63,17 @@
       - type: retrieve
         when: this.PATH_MODE == "NONE"
         data:
-          content: <<WORKSPACE_FOLDER>>/<<URL|basename>>
+          content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|basename>>
           store_key: LOCAL_PATH
       - type: retrieve
         when: this.PATH_MODE == "PATH"
         data:
-          content: <<WORKSPACE_FOLDER>>/<<URL|pathname>>
+          content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|pathname>>
           store_key: LOCAL_PATH
       - type: retrieve
         when: this.PATH_MODE == "FULL"
         data:
-          content: <<WORKSPACE_FOLDER>>/<<URL|host>>/<<URL|pathname>>
+          content: <<WORKSPACE_FOLDER>>/<<|now_timestamp>>/<<URL|host>>/<<URL|pathname>>
           store_key: LOCAL_PATH
       - type: eval
         data:
