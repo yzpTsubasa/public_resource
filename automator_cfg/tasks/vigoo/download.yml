@@ -81,7 +81,7 @@
       - type: eval
         data:
           code: |-
-            this.LOCAL_PATH.endsWith(".html") ? this.LOCAL_PATH : this.LOCAL_PATH + "/index.html"
+            this.LOCAL_PATH.match(/\.(?:html|htm|php)$/) ? this.LOCAL_PATH : this.LOCAL_PATH + "/index.html"
           store_key: LOCAL_PATH
       - type: download
         ignore_error: true
