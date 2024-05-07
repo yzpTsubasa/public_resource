@@ -45,6 +45,7 @@
           store_key: LOCAL_PATH
       - type: download
         ignore_error: true
+        async: true
         data:
           src: <<URL>>
           enable_cache: true
@@ -55,17 +56,17 @@
               Referer: <<URL>>
           dst: <<LOCAL_PATH>>
 
-      - type: shell
-        when: this.OPEN_MODE == "FILE"
-        data:
-          cmd: Code -g "<<LOCAL_PATH>>"
-          cwd: <<VSCode_Location>>
-          shell: true
+      # - type: shell
+      #   when: this.OPEN_MODE == "FILE"
+      #   data:
+      #     cmd: Code -g "<<LOCAL_PATH>>"
+      #     cwd: <<VSCode_Location>>
+      #     shell: true
 
-      - type: shell
-        when: this.OPEN_MODE == "FOLDER"
-        data:
-          cmd: Code -g "<<LOCAL_PATH|dirname>>"
-          cwd: <<VSCode_Location>>
-          shell: true
+      # - type: shell
+      #   when: this.OPEN_MODE == "FOLDER"
+      #   data:
+      #     cmd: Code -g "<<LOCAL_PATH|dirname>>"
+      #     cwd: <<VSCode_Location>>
+      #     shell: true
 
