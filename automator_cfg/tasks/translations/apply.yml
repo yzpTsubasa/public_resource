@@ -1,0 +1,136 @@
+# apply
+# 应用翻译
+- type: env_optional
+  data:
+    # 工程目录
+    WORKSPACE_FOLDER:
+    LOCALIZATION_JSON:
+    CFGJSON_FOLDER:
+
+    # 翻译目录
+    TRANSLATION_FOLDER:
+
+    # 翻译选项
+    TRANSLATION_MERGE: true
+    TRANSLATION_MERGE_NAME: merge.json
+    TRANSLATION_REPLACE_DIGITAL: false
+
+    
+    # 拉取翻译
+    TRANSLATION_DOWNLOAD_LANGUAGES:
+
+    ## 权限
+    SVN_CREDENTIAL:
+
+- type: assert
+  data:
+    key:
+      - WORKSPACE_FOLDER
+      - LOCALIZATION_JSON
+      - CFGJSON_FOLDER
+      - TRANSLATION_FOLDER
+
+- type: read_cfg
+  data:
+    src: <<WORKSPACE_FOLDER>>/<<LOCALIZATION_JSON>>
+    mapping: true
+    store_key: LOCALIZATION_CFG
+
+- type: retrieve
+  if_true: TRANSLATION_DOWNLOAD_LANGUAGES
+  data:
+    content: <<TRANSLATION_DOWNLOAD_LANGUAGES|split(",")>>
+    store_key: to_languages
+
+- type: loop
+  data:
+    key: to_languages
+    value_mapping: to_language
+    commands:
+      - type: read_cfg
+        if_true: TRANSLATION_MERGE
+        data:
+          src: <<TRANSLATION_FOLDER>>/<<appId>>/<<to_language>>/<<TRANSLATION_MERGE_NAME>>
+          store_key: translatedKV
+      - type: loop
+        show_progress: true
+        data:
+          key: tables
+          key_mapping: tableName
+          value_mapping: tableCfg
+          tip_key: tableName
+          commands:
+            - type: read_cfg
+              data:
+                src: 
+                  - <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/<<tableName>>.json
+                  - <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/base/<<tableName>>.json
+                store_key: originalTableData
+            - type: abort
+              if_false: originalTableData
+              data:
+                prompt: <<tableName>> 表不存在
+            - type: read_cfg
+              if_false: TRANSLATION_MERGE
+              data:
+                src: <<TRANSLATION_FOLDER>>/<<appId>>/<<to_language>>/<<tableName>>.json
+                store_key: translatedKV
+            - type: eval
+              data:
+                code: > 
+                  (() => {
+                    let ret = JSON.parse(JSON.stringify(this.originalTableData));
+                    ret[this.tableCfg.key].forEach(record => {
+                      this.tableCfg.fields.forEach((field, field_index) => {
+                          let content = "" + record[field];
+                          let key = content;
+                          if (this.TRANSLATION_REPLACE_DIGITAL) {
+                            let matchedDigital = key.match(/\d+/g);
+                            let matchedIndex = 0;
+                            key = key.replace(/(\d+)(?=[^\}]*(\{|$))/g, (match) => {
+                              return "[" + (matchedIndex++) + "]";
+                            })
+                          }
+                          key = this.processPipes(key, "hash");
+                          let translated = this.translatedKV?.[key];
+                          if (translated) {
+                            if (this.TRANSLATION_REPLACE_DIGITAL) {
+                              let matchedDigital = content.match(/(\d+)(?=[^\}]*(\{|$))/g);
+                              translated = translated.replace(/\[(\d+)\]/g, (match, index) => {
+                                return matchedDigital?.[index];
+                              });
+                            }
+                            record[field] = translated;
+                          }
+                      })
+                    })
+                    return ret;
+                  })()
+                store_key: translatedTableData
+            - type: write_cfg
+              data:
+                key: translatedTableData
+                dst: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/<<to_language>>/<<tableName>>.json
+                type: json_compacted
+
+      - type: svn_add
+        title: svn 添加
+        side_effect: true
+        data:
+          cwd: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/
+
+      - type: shell
+        title: svn 提交 [<<ver>>] <<to_language>> 翻译更新
+        side_effect: true
+        if_true: isUpdate
+        data:
+          cmd: svn commit -m "[<<ver>>] <<to_language>> 翻译更新" <<SVN_CREDENTIAL>> --non-interactive
+          cwd: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/
+
+      - type: shell
+        title: svn 提交 [<<ver>>] <<to_language>> 翻译同步
+        side_effect: true
+        if_false: isUpdate
+        data:
+          cmd: svn commit -m "[<<ver>>] <<to_language>> 翻译同步" <<SVN_CREDENTIAL>> --non-interactive
+          cwd: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/
