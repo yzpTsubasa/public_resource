@@ -1,0 +1,132 @@
+# generate
+# 生成翻译文本
+
+- type: env_optional
+  data:
+    # 工程目录
+    WORKSPACE_FOLDER:
+    LOCALIZATION_JSON:
+    CFGJSON_FOLDER:
+
+    # 翻译选项
+    TRANSLATION_MERGE: true
+    TRANSLATION_MERGE_NAME: merge.json
+    TRANSLATION_REPLACE_DIGITAL: false
+    CLEAN_TRANSLATION: false
+
+    # 翻译目录
+    TRANSLATION_FOLDER:
+
+    ## 权限
+    SVN_CREDENTIAL:
+
+- type: assert
+  data:
+    key:
+      - WORKSPACE_FOLDER
+      - LOCALIZATION_JSON
+      - TRANSLATION_FOLDER
+      - CFGJSON_FOLDER
+
+- type: read_cfg
+  data:
+    src: <<WORKSPACE_FOLDER>>/<<LOCALIZATION_JSON>>
+    mapping: true
+    store_key: LOCALIZATION_CFG
+- type: remove
+  title: 清理旧翻译
+  if_true: CLEAN_TRANSLATION
+  data:
+    src: <<TRANSLATION_FOLDER>>/<<appId>>/<<from_language>>/*.json
+- type: loop
+  show_progress: true
+  data:
+    key: tables
+    key_mapping: tableName
+    value_mapping: tableCfg
+    tip_key: tableName
+    commands:
+      - type: read_cfg
+        data:
+          src: 
+            - <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/<<tableName>>.json
+            - <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/base/<<tableName>>.json
+          store_key: originalTableData
+      - type: abort
+        if_false: originalTableData
+        data:
+          prompt: <<tableName>> 表不存在
+      - type: abort
+        when: "!(this.originalTableData[this.tableCfg.key])"
+        data:
+          prompt: <<tableName>> 表不存在 <<tableCfg.key>> 字段
+      - type: eval
+        data:
+          code: > 
+            (() => {
+              let ret = {};
+              this.originalTableData[this.tableCfg.key].forEach(record => {
+                this.tableCfg.fields.forEach((field, field_index) => {
+                    let content = "" + record[field];
+                    // 不记录空文本
+                    if (!content.trim()) {
+                      return;
+                    }
+                    // 替换数值
+                    if (this.TRANSLATION_REPLACE_DIGITAL) {
+                      let matchedIndex = 0;
+                      content = content.replace(/(\d+)(?=[^\}]*(\{|$))/g, (match) => {
+                        return "[" + (matchedIndex++) + "]";
+                      });
+                    }
+                    let key = this.processPipes(content, "hash");
+                    ret[key] = content;
+                    // 保存 md5
+                    record[field] = key;
+                })
+              })
+              return ret;
+            })()
+          store_key: needTranslate
+      - type: write_cfg
+        if_false: TRANSLATION_MERGE
+        data:
+          key: needTranslate
+          dst: <<TRANSLATION_FOLDER>>/<<appId>>/<<from_language>>/<<tableName>>.json
+          options:
+            mode: merge
+      - type: write_cfg
+        if_true: TRANSLATION_MERGE
+        data:
+          key: needTranslate
+          dst: <<TRANSLATION_FOLDER>>/<<appId>>/<<from_language>>/<<TRANSLATION_MERGE_NAME>>
+          options:
+            mode: merge
+      - type: write_cfg
+        title: 写入 md5
+        data:
+          key: originalTableData
+          dst: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/md5/<<tableName>>.json
+          type: json_compacted
+
+- type: svn_add
+  data:
+    cwd: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/md5
+    
+- type: shell
+  data:
+    cmd: svn commit -m "[<<ver>>] md5 更新"
+    cwd: <<WORKSPACE_FOLDER>>/<<CFGJSON_FOLDER>>/md5
+
+- type: svn_add
+  title: svn 添加
+  side_effect: true
+  data:
+    cwd: <<TRANSLATION_FOLDER>>
+    
+- type: shell
+  title: svn 提交 [<<ver>>] <<appId>> <<to_languages>> 需要的翻译更新
+  side_effect: true
+  data:
+    cmd: svn commit -m "[<<ver>>] <<appId>> <<to_languages>> 需要的翻译更新" <<SVN_CREDENTIAL>> --non-interactive
+    cwd: <<TRANSLATION_FOLDER>>
