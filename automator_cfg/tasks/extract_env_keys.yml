@@ -1,0 +1,22 @@
+# extract_env_keys
+- type: env_optional
+  data:
+    INPUT_FILE:
+- type: read_plain
+  data:
+    src: <<INPUT_FILE>>
+    store_key: file_content
+- type: truncate_all
+  raw: true
+  data:
+    key: file_content
+    pattern: <<([A-Z_]+?)(?:\||>>)
+    flatten: true
+    remove_duplicate: true
+    store_key: ENV_KEYS
+- type: eval
+  data:
+    code: >-
+      this.ENV_KEYS.map(v => `    ${v}:`).join("\n")
+    store_print: true
+    store_clipboard: true
