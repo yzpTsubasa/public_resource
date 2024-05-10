@@ -10,10 +10,11 @@
   raw: true
   data:
     key: file_content
-    pattern: <<([A-Z_]+?)(?:\||>>)
+    pattern: ([A-Z_]{5,})
     flatten: true
     remove_duplicate: true
     store_key: ENV_KEYS
+    store_print: true
 - type: eval
   data:
     code: >-
