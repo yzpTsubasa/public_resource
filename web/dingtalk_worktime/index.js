@@ -2,6 +2,7 @@ const LOCAL_STORAGE_KEY = {
   DINGTALK_CFG: "DINGTALK_CFG",
 };
 var needEndTime = null;
+var lastDay = null;
 var hasNotified = false;
 setInterval(() => {
   updateTimer();
@@ -211,7 +212,7 @@ function processDingTalkWorktime(
   )}(共${filteredHistory.length}天)`;
   const diff = needWorkTimeInMinutes - totalWorkTimeInMinutes;
   Q("#label_need").innerHTML = `${formatMinutes(Math.max(0, diff))}`;
-  const lastDay = filteredHistory[filteredHistory.length - 1];
+  lastDay = filteredHistory[filteredHistory.length - 1];
   const showRecommend = lastDay && !lastDay.endTime;
   Q("#left_wrap").style.display = showRecommend ? "" : "none";
   if (showRecommend) {
@@ -230,6 +231,8 @@ function processDingTalkWorktime(
 }
 var hasNotifiedAlert = false;
 function updateTimer() {
+  const showToday = lastDay && isSameDay(new Date(), lastDay.begTime) && !lastDay.endTime;
+  Q("#label_today").innerHTML = formatMilliSeconds(showToday ? Date.now() - lastDay.begTime.getTime() : 0, true);
   if (needEndTime) {
     const leftTime = needEndTime.getTime() - Date.now();
     const leftTimeAlert = alerTime.getTime() - Date.now();
