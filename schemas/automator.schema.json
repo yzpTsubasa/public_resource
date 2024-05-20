@@ -342,6 +342,42 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "backup", "title": "备份文件"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "sourceFolder": {"title": "备份的原始目录"},
+                                "backupFolder": {"title": "备份到指定的目录"},
+                                "backupCfgs": {"title": "备份配置", "type": "array", "items": {
+                                    "oneOf": [
+                                        { "type": "string" },
+                                        { "type": "object", "properties": {
+                                                "sourceFilename": {"type": "string", "title": "原始文件或者glob"},
+                                                "sourceEncoding": {"type": "string", "title": "原始文件编码"},
+                                                "sourceKeys": {"type": "array", "title": "原始文件内容键"},
+                                                "sourceType": {"type": "string", "title": "原始文件类型"},
+                                                "backupFilename": {"type": "string", "title": "备份文件名"},
+                                                "backupEncoding": {"type": "string", "title": "备份编码"}
+                                            },
+                                            "required": ["sourceFilename"]
+                                        }
+                                    ]
+                                }}
+                            },
+                            "required": ["sourceFolder", "backupFolder", "backupCfgs"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {"const": "assert", "title": "断言"},
                         "data": {
                             "type": "object",
