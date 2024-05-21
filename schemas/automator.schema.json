@@ -6,6 +6,27 @@
     "type": "array",
     "items": {"$ref": "#/definitions/command"},
     "definitions": {
+        "rename": {
+            "anyOf": [
+                {"title": "新文件名", "type": "string"},
+                {
+                    "type": "object",
+                    "title": "重命名",
+                    "properties": {
+                        "base_trim_left": {"title": "修剪文件名左侧"},
+                        "base_trim_right": {"title": "修剪文件名右侧"},
+                        "dir_trim_left": {"title": "修剪路径左侧"},
+                        "dir_trim_right": {"title": "修剪路径右侧"},
+                        "dir_prefix": {"title": "添加路径前缀"},
+                        "dir_suffix": {"title": "添加路径后缀"},
+                        "base_prefix": {"title": "添加文件名前缀"},
+                        "base_suffix": {"title": "添加文件名后缀"},
+                        "hash_suffix": {"title": "使用hash添加文件名后缀"},
+                        "time_suffix": {"title": "使用时间添加文件名后缀"}
+                    }
+                }
+            ]
+        },
         "common_data": {
             "properties": {
                 "commands": {
@@ -42,25 +63,7 @@
                                     ]
                                 },
                                 "auto_encoding": {"title": "自动检查编码", "default": true},
-                                "rename": {
-                                    "anyOf": [
-                                        {"title": "新文件名", "type": "string"},
-                                        {
-                                            "type": "object",
-                                            "title": "重命名",
-                                            "properties": {
-                                                "base_trim_left": {"title": "修剪文件名左侧"},
-                                                "base_trim_right": {"title": "修剪文件名右侧"},
-                                                "dir_trim_left": {"title": "修剪路径左侧"},
-                                                "dir_trim_right": {"title": "修剪路径右侧"},
-                                                "dir_prefix": {"title": "添加路径前缀"},
-                                                "dir_suffix": {"title": "添加路径后缀"},
-                                                "base_prefix": {"title": "添加文件名前缀"},
-                                                "base_suffix": {"title": "添加文件名后缀"}
-                                            }
-                                        }
-                                    ]
-                                },
+                                "rename": { "$ref": "#/definitions/rename" },
                                 "mode": {
                                     "title": "写入模式",
                                     "enum": ["merge", "concat"]
@@ -358,7 +361,9 @@
                                                 "sourceKeys": {"type": "array", "title": "原始文件内容键"},
                                                 "sourceType": {"type": "string", "title": "原始文件类型"},
                                                 "backupFilename": {"type": "string", "title": "备份文件名"},
-                                                "backupEncoding": {"type": "string", "title": "备份编码"}
+                                                "backupEncoding": {"type": "string", "title": "备份编码"},
+                                                "quiet": { "type": "boolean", "title": "静默模式" },
+                                                "backupRename": { "$ref": "#/definitions/rename" }
                                             },
                                             "required": ["sourceFilename"]
                                         }
