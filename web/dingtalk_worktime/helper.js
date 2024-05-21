@@ -67,7 +67,13 @@ function isSameWeek(date1, date2) {
   return week1 === week2;
 }
 
-function formatMilliSeconds(milliseconds, full) {
+function formatMilliSeconds(milliseconds, full, signed = false) {
+  var isNegative = milliseconds < 0;
+  milliseconds = Math.abs(milliseconds);
+  return (isNegative ? '-' : (signed ? '+' : '')) + _formatMilliSeconds(milliseconds, full);
+}
+
+function _formatMilliSeconds(milliseconds, full) {
   // 如果大于1小时,则显示小时和分钟
   if (milliseconds > 60 * 60 * 1000) {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
@@ -89,8 +95,8 @@ function formatMilliSeconds(milliseconds, full) {
   return `${Math.floor(milliseconds / 1000)}秒`;
 }
 
-function formatMinutes(minutes) {
-  return formatMilliSeconds(minutes * 60 * 1000);
+function formatMinutes(minutes, full, signed) {
+  return formatMilliSeconds(minutes * 60 * 1000, full, signed);
 }
 
 function formatTime(date) {

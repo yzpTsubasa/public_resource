@@ -1,9 +1,17 @@
 const LOCAL_STORAGE_KEY = {
   DINGTALK_CFG: "DINGTALK_CFG",
 };
+
+function resetWeekDateRange(history) {
+  Q("#input_date_begin").valueAsDate = history[0]?.begTime || new Date();
+  Q("#input_date_end").valueAsDate = history[history.length - 1]?.begTime || new Date();
+  return [Q("#input_date_begin").valueAsDate, Q("#input_date_end").valueAsDate];
+}
+
 var needEndTime = null;
 var lastDay = null;
 var hasNotified = false;
+var historyChanged = true;
 setInterval(() => {
   updateTimer();
 }, 1000);
@@ -26,6 +34,7 @@ if (localCfg) {
 }
 // 监听 Q("#input_dingtalk") 文本变化
 Q("#input_dingtalk").addEventListener("input", function () {
+  historyChanged = true;
   processDingTalkInput();
 });
 Q("#input_worktime_per_day").addEventListener("input", function () {
@@ -40,6 +49,12 @@ Q("#input_worktime_begin").addEventListener("input", function () {
 Q("#input_alert_forward").addEventListener("input", function () {
   processDingTalkInput();
 });
+Q("#input_date_begin").addEventListener("input", function () {
+  processDingTalkInput();
+});
+Q("#input_date_end").addEventListener("input", function () {
+  processDingTalkInput();
+});
 Q("#btn_read_clipboard").addEventListener("click", function () {
   Q("#input_dingtalk").value = "";
   clearStatus();
@@ -52,6 +67,7 @@ Q("#btn_read_clipboard").addEventListener("click", function () {
     .readText()
     .then((text) => {
       Q("#input_dingtalk").value = text;
+      historyChanged = true;
       processDingTalkInput();
     })
     .catch((err) => {
@@ -69,6 +85,7 @@ function setLocalCfg() {
   };
   localStorage.setItem(LOCAL_STORAGE_KEY.DINGTALK_CFG, JSON.stringify(cfg));
 }
+
 function processDingTalkInput() {
   setLocalCfg();
   updateNotificationPermission();
@@ -77,35 +94,42 @@ function processDingTalkInput() {
     Q("#input_worktime_per_day").value,
     Q("#switch_filter").checked,
     Q("#input_worktime_begin").value,
-    Q("#input_alert_forward").value
+    Q("#input_alert_forward").value,
+    Q("#input_date_begin").valueAsDate,
+    Q("#input_date_end").valueAsDate,
   );
 }
 
 function addStatus(message, type = "secondary") {
   Q("#status_wrapper").innerHTML += `<p class="text-${type}">${message}</p>`;
 }
+
 function clearStatus() {
   Q("#status_wrapper").innerHTML = "";
 }
+
 function processDingTalkWorktime(
   content,
   worktimePerDay,
   filter,
   reqBegin,
-  alertForward
+  alertForward,
+  filterBeginDate,
+  filterEndDate,
 ) {
   needEndTime = null;
   clearStatus();
+  Q("#input_date_range").style.display = filter ? "none" : "";
   const matches = Array.from(content.matchAll(
     /(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
   )).toSorted((a, b) => {
     const [hourA, minuteA, typeA, monthA, dayA, yearA] = a.slice(1);
     const [hourB, minuteB, typeB, monthB, dayB, yearB] = b.slice(1);
-    return yearA - yearB
-      || monthA - monthB
-      || dayA - dayB
-      || hourA - hourB
-      || minuteA - minuteB;
+    return yearA - yearB ||
+      monthA - monthB ||
+      dayA - dayB ||
+      hourA - hourB ||
+      minuteA - minuteB;
   });
 
   let begTime;
@@ -114,7 +138,7 @@ function processDingTalkWorktime(
   let isNewDay = false;
   let tmp;
   const [reqBeginHour, reBeginMinute] = (reqBegin || "00:00")
-    .split(":")
+  .split(":")
     .map((v) => +v);
   for (const match of matches) {
     const args = match.slice(1);
@@ -162,34 +186,48 @@ function processDingTalkWorktime(
       isNewDay = false;
     }
   }
+  if (historyChanged) {
+    [filterBeginDate, filterEndDate] = resetWeekDateRange(history);
+  }
   // 过滤非本周的打卡记录
   var filteredHistory = [];
-  if (filter) {
-    for (let i = history.length - 1; i >= 0; i--) {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const curr = history[i];
+    const next = history[i + 1];
+    if (filter) {
+      // 仅本周
       if (
         i == history.length - 1 ||
-        isSameWeek(history[i].begTime, history[i + 1].begTime)
+        isSameWeek(curr.begTime, next.begTime)
       ) {
-        filteredHistory.unshift(history[i]);
+        filteredHistory.unshift(curr);
         continue;
       }
       break;
+    } else {
+      // 判断是否在指定时间范围
+      if (curr.begTime.getTime() >= filterBeginDate.setHours(0, 0, 0, 0) && curr.begTime.getTime() <= filterEndDate.setHours(23, 59, 59, 999)) {
+        filteredHistory.unshift(curr);
+      }
     }
-  } else {
-    filteredHistory = history;
   }
   filteredHistory.forEach((item) => {
     // 每日打卡情况
-    const { begTime, endTime, workTimeInMinutes, realBegTime } = item;
+    const {
+      begTime,
+      endTime,
+      workTimeInMinutes,
+      realBegTime
+    } = item;
     const date = (begTime || endTime).toLocaleDateString(undefined, {
       weekday: "short",
       month: "short",
       day: "numeric",
     });
     const total =
-      begTime && endTime
-        ? ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})`
-        : "";
+      begTime && endTime ?
+      ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})` :
+      "";
     if (realBegTime != begTime) {
       addStatus(
         `[${date}] ${formatTime(begTime)}<span class="text-danger">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
@@ -207,11 +245,13 @@ function processDingTalkWorktime(
   );
   const totalWorkTimeFormated = formatMinutes(totalWorkTimeInMinutes);
   const needWorkTimeInMinutes = worktimePerDay * 60 * filteredHistory.length;
-  Q("#label_total").innerHTML = `${totalWorkTimeFormated}/${formatMinutes(
+  Q("#label_total").innerHTML = `${totalWorkTimeFormated}(${formatMinutes(
+    totalWorkTimeInMinutes - needWorkTimeInMinutes, undefined, true
+  )})/${formatMinutes(
     needWorkTimeInMinutes
   )}(共${filteredHistory.length}天)`;
   const diff = needWorkTimeInMinutes - totalWorkTimeInMinutes;
-  Q("#label_need").innerHTML = `${formatMinutes(Math.max(0, diff))}`;
+  // Q("#label_need").innerHTML = `${formatMinutes(Math.max(0, diff))}`;
   lastDay = filteredHistory[filteredHistory.length - 1];
   const showRecommend = lastDay && !lastDay.endTime;
   Q("#left_wrap").style.display = showRecommend ? "" : "none";
@@ -228,8 +268,11 @@ function processDingTalkWorktime(
     updateTimer();
     // Q("#label_off_duty").innerHTML = `${needEndTime.toLocaleString()}`;
   }
+
+  historyChanged = false;
 }
 var hasNotifiedAlert = false;
+
 function updateTimer() {
   const showToday = lastDay && isSameDay(new Date(), lastDay.begTime) && !lastDay.endTime;
   Q("#label_today").innerHTML = formatMilliSeconds(showToday ? Date.now() - lastDay.begTime.getTime() : 0, true);
@@ -266,8 +309,7 @@ function updateTimer() {
           new Notification(
             `下班打卡时间到了: ${needEndTime.toLocaleTimeString(undefined, {
               timeStyle: "short",
-            })}`,
-            {
+            })}`, {
               icon: "./favicon.png",
             }
           );
