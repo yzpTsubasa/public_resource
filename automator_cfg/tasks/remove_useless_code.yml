@@ -1,0 +1,36 @@
+- type: env_optional
+  data:
+    INCLUDES: 
+    EXCLUDES: 
+- type: eval
+  data:
+    code: >
+      this.EXCLUDES ? this.EXCLUDES.split(",") : []
+    store_key: EXCLUDES
+- type: files
+  data:
+    src: <<INCLUDES>>
+    store_key: srcs
+- type: loop
+  data:
+    key: srcs
+    value_mapping: src
+    commands:
+      - type: continue
+        when: this.EXCLUDES.includes(this.processPipes(this.src, "basename"))
+      - type: read_plain
+        data:
+          src: <<src>>
+          store_key: src_content
+      - type: eval
+        data:
+          code: this.processPipes(this.src_content, "splitlines").every(line => !line || line.startsWith("//"))
+          store_key: is_empty
+      - type: print
+        if_true: is_empty
+        data:
+          content: <<src>>
+      - type: remove
+        if_true: is_empty
+        data:
+          src: <<src>>
