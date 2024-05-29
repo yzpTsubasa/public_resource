@@ -224,6 +224,7 @@ function processDingTalkWorktime(
       month: "short",
       day: "numeric",
     });
+    const isToday = isSameDay(new Date(), begTime);
     const total =
       begTime && endTime ?
       ` (${formatMilliSeconds(endTime.getTime() - begTime.getTime())})` :
@@ -234,7 +235,7 @@ function processDingTalkWorktime(
       );
     } else {
       addStatus(
-        `[${date}] ${formatTime(begTime)}~${formatTime(endTime)} ${total}`
+        `<span class="${isToday ? "text-success" : ""}">[${date}] ${formatTime(begTime)}~${formatTime(endTime)} ${total}</span>`
       );
     }
   });
