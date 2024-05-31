@@ -27,6 +27,14 @@
                 }
             ]
         },
+        "type": {
+            "title": "类型",
+            "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence", "yml_compacted", "yaml_compacted", "json_compacted", "json_simple", "string"]
+        },
+        "parse_type": {
+            "title": "结果值解析类型",
+            "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence"]
+        },
         "common_data": {
             "properties": {
                 "commands": {
@@ -79,19 +87,13 @@
                         {"type": "string"}
                     ]
                 },
-                "type": {
-                    "title": "类型",
-                    "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence", "yml_compacted", "yaml_compacted", "json_compacted", "json_simple", "string"]
-                },
+                "type": {"$ref": "#/definitions/type"},
                 "pattern": {"title": "正则表达式"},
                 "cwd": {"title": "执行目录"},
                 "content": {"title": "来源内容"},
                 "content_print": {"title": "来源内容打印", "default": true},
                 "content_confirm": {"title": "来源内容确认", "default": true},
-                "parse_type": {
-                    "title": "结果值解析类型",
-                    "enum": ["markdown_table_array", "markdown_table", "markdown_table_object", "yml", "yaml", "json", "xml", "xml2json", "xml2js", "json2xml", "js2xml", "lua_assignment", "lua", "svn_diff", "sequence"]
-                },
+                "parse_type": {"$ref": "#/definitions/parse_type"},
                 "value_type": {
                     "title": "结果值转换类型",
                     "enum": ["int", "integer", "float", "number", "string", "str", "list", "array", "bool", "boolean", "millisecond"]
@@ -362,6 +364,10 @@
                                                 "sourceType": {"type": "string", "title": "原始文件类型"},
                                                 "backupFilename": {"type": "string", "title": "备份文件名"},
                                                 "backupEncoding": {"type": "string", "title": "备份编码"},
+                                                "backupPrettify": {"type": "object", "title": "备份美化", "properties": {
+                                                    "from": {"$ref": "#/definitions/parse_type"},
+                                                    "to": {"$ref": "#/definitions/type"}
+                                                }},
                                                 "quiet": { "type": "boolean", "title": "静默模式" },
                                                 "backupRename": { "$ref": "#/definitions/rename" }
                                             },
