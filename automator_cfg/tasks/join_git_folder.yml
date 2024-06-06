@@ -1,0 +1,47 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: env_optional
+  data:
+    SRC_FOLDER: 
+    DST_FOLDER: 
+    REMOTE_URL: 
+    REMOTE_NAME: origin
+
+- type: assert
+  data:
+    key:
+      - SRC_FOLDER
+      - DST_FOLDER
+      - REMOTE_URL
+      - REMOTE_NAME
+
+- type: files
+  data:
+    src: <<SRC_FOLDER>>/*
+    store_key: folders
+
+- type: loop
+  data:
+    key: folders
+    value_mapping: folder
+    commands:
+      - type: storage
+        data:
+          remote_url: ""
+      - type: shell
+        ignore_error: true
+        data:
+          cmd: git remote get-url <<REMOTE_NAME>>
+          cwd: <<folder>>
+          store_key: remote_url
+          capture_stdout: true
+          store_trim: true
+      - type: continue
+        when: this.remote_url != this.REMOTE_URL
+      - type: move_local
+        data:
+          src: <<folder>>
+          dst: <<DST_FOLDER>>
+
+
