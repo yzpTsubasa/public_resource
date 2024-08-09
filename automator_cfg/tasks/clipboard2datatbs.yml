@@ -1,0 +1,25 @@
+- type: print
+  data:
+    content: Starting
+- type: read_clipboard
+  data:
+    store_key: clipboard
+    store_print: true
+- type: truncate_all
+  data:
+    key: clipboard
+    pattern: (\S+)\s+(\S+)
+    struct:
+      - comment
+      - id
+    store_key: items
+    store_print: true
+- type: eval
+  data:
+    code: |
+      this.items.map(({id, comment}) => 
+      `        /** @type {number} ${comment} */
+              ${id},`
+      ).join('\n')
+    store_clipboard: true
+    store_print: true
