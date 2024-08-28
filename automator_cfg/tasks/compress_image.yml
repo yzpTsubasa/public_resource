@@ -12,6 +12,6 @@
 - type: compress
   data:
     src: <<INPUT_FILE>>
-    dst: <<INPUT_FILE|basename_noext>>.compressed<<INPUT_FILE|extname>>
+    dst: <<INPUT_FILE|dirname>>/<<INPUT_FILE|basename_noext>>.compressed<<INPUT_FILE|extname>>
     options:
       quality: <<QUALITY>>
