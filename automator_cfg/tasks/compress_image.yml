@@ -1,0 +1,17 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: title
+  data:
+    content: compress_image
+- type: env_optional
+  data:
+    INPUT_FILE: 
+    QUALITY: 80
+
+- type: compress
+  data:
+    src: <<INPUT_FILE>>
+    dst: <<INPUT_FILE|basename_noext>>.compressed<<INPUT_FILE|extname>>
+    options:
+      quality: <<QUALITY>>
