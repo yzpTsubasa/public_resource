@@ -866,13 +866,11 @@
                             "properties": {
                                 "src": {"title": "图片地址", "default": ""},
                                 "dst": {"title": "保存地址", "default": ""},
-                                "format": {"title": "保存格式", "default": ""},
                                 "options": {
                                     "type": "object",
-                                    "title": "额外选项(具体参考 sharp 文档 https://sharp.pixelplumbing.com/api-output)",
+                                    "title": "额外选项",
                                     "properties": {
-                                        "quality": {"title": "压缩质量", "default": 80},
-                                        "colors": {"title": "颜色数量", "default": 256}
+                                        "quality": {"title": "压缩质量", "default": 80}
                                     }
                                 }
                             },
