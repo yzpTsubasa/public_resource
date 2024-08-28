@@ -859,6 +859,36 @@
                 {
                     "type": "object",
                     "properties": {
+                        "type": {"const": "compress", "title": "图片压缩"},
+                        "data": {
+                            "type": "object",
+                            "title": "命令参数",
+                            "properties": {
+                                "src": {"title": "图片地址", "default": ""},
+                                "dst": {"title": "保存地址", "default": ""},
+                                "format": {"title": "保存格式", "default": ""},
+                                "options": {
+                                    "type": "object",
+                                    "title": "额外选项(具体参考 sharp 文档 https://sharp.pixelplumbing.com/api-output)",
+                                    "properties": {
+                                        "quality": {"title": "压缩质量", "default": 80},
+                                        "colors": {"title": "颜色数量", "default": 256}
+                                    }
+                                }
+                            },
+                            "required": ["src", "dst"],
+                            "allOf": [
+                                {"$ref": "#/definitions/common_data"}
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {"$ref": "#/definitions/common_cfg"}
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
                         "type": {
                             "enum": ["exec_shell", "shell"],
                             "title": "执行命令行"
