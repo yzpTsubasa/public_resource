@@ -152,7 +152,7 @@
       - type: write_cfg
         data:
           key: logs
-          dst: ~/Desktop/技能描述(<<skill_type>>).yml
+          dst: <<AUTOMATOR_APPDATA>>/tmp/技能描述(<<skill_type>>).yml
       - type: open
         data:
-          src: ~/Desktop/技能描述(<<skill_type>>).yml
+          src: <<AUTOMATOR_APPDATA>>/tmp/技能描述(<<skill_type>>).yml
