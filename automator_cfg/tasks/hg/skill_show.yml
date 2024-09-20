@@ -1,0 +1,158 @@
+- type: env_optional
+  data:
+    WORKSPACE_FOLDER: <<CWD>>
+- type: first_exist
+  data:
+    src: <<WORKSPACE_FOLDER>>
+    store_key: root_dir
+- type: print
+  data:
+    content: "当前工作目录为: <<root_dir>>"
+- type: read_cfg
+  data:
+    store_key: s_skill_info
+    src: '<<root_dir>>/resource/assets/cfgjson/s_skill_info.json'
+- type: retrieve
+  data:
+    key: s_skill_info.s_skill_info
+    store_key: s_skill_info
+- type: list2dict
+  data:
+    key: s_skill_info
+    store_key: s_skill_info
+- type: read_cfg
+  data:
+    store_key: skillshow
+    src: '<<root_dir>>/resource/assets/cfgjson/skillshow.json'
+- type: retrieve
+  data:
+    key: skillshow.skillshow
+    store_key: skillshow
+- type: eval
+  data:
+    code: >
+      $<<skillshow>>.map(v => [v.id, v.event])
+    store_key: skillshow
+- type: list2dict
+  data:
+    key: skillshow
+    store_key: skillshow
+- type: read_cfg
+  data:
+    store_key: skillevent
+    src: '<<root_dir>>/resource/assets/cfgjson/skillevent.json'
+- type: retrieve
+  data:
+    key: skillevent.skillevent
+    store_key: skillevent
+- type: eval
+  data:
+    code: $<<skillevent>>.map(v => [v[0], v.slice(1)])
+    store_key: skillevent
+- type: list2dict
+  data:
+    key: skillevent
+    store_key: skillevent
+- type: read_cfg
+  data:
+    store_key: event_desc
+    src: 
+      - <<root_dir>>/resource/editor/assets/cfgjson/eventdesc.json
+      - <<root_dir>>/resource/assets/cfgjson/edit/eventdesc.json
+- type: retrieve
+  data:
+    key: event_desc.event_desc
+    store_key: event_desc
+- type: eval
+  data:
+    code: >
+      $<<event_desc>>.map(v => [v[0].match(/(\d+)-/)[1], v])
+    store_key: event_desc
+- type: list2dict
+  data:
+    key: event_desc
+    store_key: event_desc
+- type: loop_forever
+  data:
+    commands:
+      - type: input
+        title: 输入技能类型
+        required: true
+        data:
+          value_type: int
+          store_key: skill_type
+      - type: storage
+        data:
+          logs: []
+      - type: eval
+        data:
+          code: "`查询技能类型: <<skill_type>>`"
+          store_key: logs
+          store_mode: push
+      - type: eval
+        data:
+          code: ' $<<s_skill_info>>[<<skill_type>>] || <<skill_type>> '
+          store_key: skillshow_id
+      - type: continue
+        if_false: skillshow_id
+      - type: eval
+        data:
+          code: ' $<<skillshow>>[<<skillshow_id>>] '
+          store_key: showdatas
+      - type: print
+        if_false: showdatas
+        data:
+          level: 4
+          content: "找不到技能配置"
+      - type: continue
+        if_false: showdatas
+      - type: loop
+        data:
+          key: showdatas
+          value_mapping: showdata
+          commands:
+            - type: eval
+              data:
+                code: '{"时刻": $<<showdata>>[0], "表现": []}'
+                store_key: logs
+                store_mode: push
+            - type: eval
+              data:
+                store_key: eventlist
+                code: '$<<showdata>>.slice(1)'
+            - type: loop
+              data:
+                key: eventlist
+                value_mapping: event
+                commands:
+                  - type: retrieve
+                    data:
+                      key: skillevent.<<event>>
+                      store_key: cur_skill_events
+                  - type: eval
+                    data:
+                      store_key: cur_event_desc
+                      code: '$<<event_desc>>[$<<cur_skill_events>>[0]] '
+                  - type: eval
+                    data:
+                      store_key: cur_event_desc
+                      # code: ' [ [a, b] for a, b in zip(storage.get("cur_event_desc"), storage.get("cur_skill_events"))] '
+                      code: >
+                        $<<cur_event_desc>>.map((v, i) => [v, $<<cur_skill_events>>[i]])
+                  - type: list2dict
+                    data:
+                      key: cur_event_desc
+                      store_key: 
+                        - logs
+                        - $<<logs>>.length - 1
+                        - 表现
+                      store_mode: push
+                      store_key_type:
+                        1: eval
+      - type: write_cfg
+        data:
+          key: logs
+          dst: ~/Desktop/技能描述(<<skill_type>>).yml
+      - type: open
+        data:
+          src: ~/Desktop/技能描述(<<skill_type>>).yml
