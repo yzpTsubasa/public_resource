@@ -1,0 +1,49 @@
+- type: read_clipboard
+  data:
+    store_key: clipboard_data
+- type: eval
+  data:
+    code: |
+      (() => {
+        const clipboardData = this.clipboard_data;
+        const parts = clipboardData.split("\n\n").filter(part => part.trim().length > 0);
+        const cppType2JsType = {
+          "int64": "number",
+          "int32": "number",
+          "int16": "number",
+          "int8": "number",
+          "uint64": "number",
+          "uint32": "number",
+          "uint16": "number",
+          "uint8": "number",
+          "float64": "number",
+          "float32": "number",
+          "bool": "boolean",
+          "string": "string",
+        };
+        let jsCode = "";
+        for (const part of parts) {
+          const typeReg = /type (\w+) struct/;
+          const type = typeReg.exec(part)[1];
+          const propReg = /^\s+(\w+)\s+(\w+)/mg;
+          const props = {};
+          let match;
+          while ((match = propReg.exec(part))!== null) {
+            props[match[1]] = {
+              type: cppType2JsType[match[2]] || match[2],
+            };
+          }
+          jsCode += `export type ${type} = {`;
+          for (const [propName, propType] of Object.entries(props)) {
+            jsCode += `\n  ${propName}: ${propType.type};`;
+          }
+          jsCode += `\n};\n\n`;
+        }
+        return jsCode;
+      })()
+    store_print: true
+    store_key: clipboard_js_code
+
+- type: write_clipboard
+  data:
+    key: clipboard_js_code
