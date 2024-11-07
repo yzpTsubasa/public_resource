@@ -1,0 +1,45 @@
+
+
+- type: env_optional
+  data:
+    INPUT_FILE: 
+    TortoiseMerge: C:\Program Files\TortoiseSVN\bin\TortoiseMerge.exe
+
+- type: exec_shell
+  data:
+    cmd: svn info <<INPUT_FILE>>
+    capture_stdout: true
+    parse_type: yaml
+    store_key: svn_info
+- type: storage
+  data:
+    REVISION: <<svn_info.Last Changed Rev>>
+- type: storage
+  data:
+    REV_DOC: <<AUTOMATOR_SCRATCH>>/<<INPUT_FILE|basename_noext>>_r<<REVISION>>.docx
+    REV_TXT: <<AUTOMATOR_SCRATCH>>/<<INPUT_FILE|basename_noext>>_r<<REVISION>>.txt
+    CUR_TXT: <<AUTOMATOR_SCRATCH>>/<<INPUT_FILE|basename_noext>>.txt
+
+- type: shell
+  ignore_error: true
+  data:
+    cmd: svn cat "<<INPUT_FILE>>" -r <<REVISION|calc("-", 1)>>
+    capture_stdout: true
+    encoding: raw
+    store_key: svn_cat
+    store_dst: <<REV_DOC>>
+
+- type: word2txt
+  data:
+    src: <<REV_DOC>>
+    store_dst: <<REV_TXT>>
+
+- type: word2txt
+  data:
+    src: <<INPUT_FILE>>
+    store_dst: <<CUR_TXT>>
+
+- type: exec_shell
+  data:
+    cmd: >
+      "<<TortoiseMerge>>" <<REV_TXT>> <<CUR_TXT>> 
