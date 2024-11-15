@@ -55,8 +55,10 @@ Q("#input_date_begin").addEventListener("input", function () {
 Q("#input_date_end").addEventListener("input", function () {
   processDingTalkInput();
 });
-Q("#btn_read_clipboard").addEventListener("click", function () {
+Q("#btn_reset").addEventListener("click", function () {
   Q("#input_dingtalk").value = "";
+});
+Q("#btn_read_clipboard").addEventListener("click", function () {
   clearStatus();
   // 网页获取剪切板内容
   if (!navigator.clipboard) {
@@ -66,7 +68,7 @@ Q("#btn_read_clipboard").addEventListener("click", function () {
   navigator.clipboard
     .readText()
     .then((text) => {
-      Q("#input_dingtalk").value = text;
+      Q("#input_dingtalk").value += text;
       historyChanged = true;
       processDingTalkInput();
     })
