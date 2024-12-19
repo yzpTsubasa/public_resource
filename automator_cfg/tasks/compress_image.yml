@@ -8,10 +8,43 @@
   data:
     INPUT_FILE: 
     QUALITY: 80
+    SCALE: 1.0
+    OVERWRITE: false
 
-- type: compress
+- type: file_info
   data:
     src: <<INPUT_FILE>>
-    dst: <<INPUT_FILE|dirname>>/<<INPUT_FILE|basename_noext>>.compressed<<INPUT_FILE|extname>>
-    options:
-      quality: <<QUALITY>>
+    store_key: INPUT_FILE_INFO
+- type: files
+  if_true: INPUT_FILE_INFO.isDirectory
+  data:
+    src: <<INPUT_FILE>>/**/*[.jpg|.jpeg|.png]
+    store_key: INPUT_FILES
+- type: files
+  if_false: INPUT_FILE_INFO.isDirectory
+  data:
+    src: <<INPUT_FILE>>
+    store_key: INPUT_FILES
+- type: loop
+  show_progress: true
+  data:
+    key: INPUT_FILES
+    value_mapping: INPUT_FILE
+    commands:
+      - type: store
+        data:
+          OTHER_DST: <<INPUT_FILE|dirname>>/<<INPUT_FILE|basename_noext>>.compressed<<INPUT_FILE|extname>>
+          SAME_DST: <<INPUT_FILE>>
+      - type: eval
+        data:
+          code: >
+            this.OVERWRITE ? this.SAME_DST : this.OTHER_DST
+          store_key: OUTPUT_FILE
+
+      - type: compress
+        data:
+          src: <<INPUT_FILE>>
+          dst: <<OUTPUT_FILE>>
+          options:
+            quality: <<QUALITY>>
+            scale: <<SCALE>>
