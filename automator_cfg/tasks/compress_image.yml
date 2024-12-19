@@ -10,6 +10,12 @@
     QUALITY: 80
     SCALE: 1.0
     OVERWRITE: false
+    DIRECTORY: false
+
+- type: store
+  if_true: DIRECTORY
+  data:
+    INPUT_FILE: <<INPUT_FILE|dirname>>
 
 - type: file_info
   data:
