@@ -1,4 +1,4 @@
-let isRecordVisible = true;
+let isRecordVisible = false;
 
 function UpdateRecordVisibility() {
     Q("#records_wrap").style.display = isRecordVisible ? "flex" : "none";
