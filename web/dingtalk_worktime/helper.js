@@ -99,8 +99,15 @@ function formatMinutes(minutes, full, signed) {
   return formatMilliSeconds(minutes * 60 * 1000, full, signed);
 }
 
-function formatTime(date) {
+function formatTime(date, isRemake) {
   return date
-    ? date.toLocaleTimeString(undefined, { timeStyle: "short" })
+    ? (date.toLocaleTimeString(undefined, { timeStyle: "short" }) + (isRemake? "(补)" : ""))
     : "未打卡";
+}
+
+/** 补全数字到指定位数 */
+function pad(num, size, padChar = "0") {
+  let s = num + "";
+  while (s.length < size) s = padChar + s;
+  return s;
 }

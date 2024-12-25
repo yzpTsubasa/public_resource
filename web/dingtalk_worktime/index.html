@@ -10,9 +10,49 @@
             justify-content: center;
             align-items: flex-start;
         }
+
         #label_recommend {
             font-weight: bolder;
             font-size: x-large;
+        }
+
+        #records_wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: absolute;
+            top: 3.5rem;
+            bottom: 4rem;
+            left: 0;
+            background-color: white;
+            z-index: 1000;
+            /* 阴影效果 */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            /* 边框 */
+            border: 1px solid #ccc;
+            width: 100%;
+            padding: 2em 1em;
+            overflow: auto;
+        }
+
+        .record_item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5em;
+        }
+
+        #records_list {
+            /* 背景圆角，阴影 */
+            border-radius: 0.5em;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            /* 边框 */
+            border: 1px solid #ccc;
+            padding: 0.5em;
+            margin-bottom: 3em;
+        }
+        .delete_record {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -42,11 +82,11 @@
             <div id="left_wrap" style="display: none;">
                 <p>建议打卡: <span id="label_recommend"></span></p>
                 <p><span id="label_off_duty"></span></p>
-                <p><span id="label_off_duty_alert"></span></p>            
+                <p><span id="label_off_duty_alert"></span></p>
                 <div class="input-group mb-3">
                     <label class="input-group-text">提前提醒(分钟)</label>
-                    <input type="number" id="input_alert_forward" class="form-control" value="0" step="1" min="0">            
-            </div>
+                    <input type="number" id="input_alert_forward" class="form-control" value="0" step="1" min="0">
+                </div>
             </div>
             <hr>
             <div class="text-secondary">
@@ -61,10 +101,38 @@
                 <p id="status_wrapper">
                 </p>
             </div>
+            <hr>
+            <!-- 查看补卡记录 -->
+            <button type="button" class="btn btn-secondary" id="btn_records">手动补卡</button>
+            <!-- 补卡对话框 -->
+            <div id="records_wrap">
+                <!-- 日期 时间 类型 操作 -->
+                <div id="records_list">
+                </div>
+                <!-- 无记录提示 -->
+                <div id="records_empty" class="text-secondary">
+                    <p>暂无补卡记录</p>
+                </div>
+                <div class="records_add_wrap">
+                    <div class="input-group mb-3">
+                    <input type="date" id="input_record_date" class="form-control" value="">
+                    <input type="time" id="input_record_time" class="form-control" value="">
+                </div>
+                <div class="input-group mb-3">
+                    <!-- 类型选择 -->
+                    <select id="input_record_type" class="form-select">
+                        <option value="上班">上班</option>
+                        <option value="下班">下班</option>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="btn_add_record">添加</button>
+                </div>
+                </div>
+            </div>
         </div>
         <script src="../libs/bootstrap.bundle.min.js"></script>
         <script src="./helper.js"></script>
         <script src="./index.js"></script>
+        <script src="./records.js"></script>
 </body>
 
 </html>

@@ -23,13 +23,15 @@ const tooltipList = [...tooltipTriggerList].map(
   (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
 );
 var localCfg = localStorage.getItem(LOCAL_STORAGE_KEY.DINGTALK_CFG);
+let records = [];
 if (localCfg) {
   localCfg = JSON.parse(localCfg);
   Q("#input_dingtalk").value = localCfg.dingtalk;
   Q("#input_worktime_per_day").value = localCfg.worktime_per_day;
   Q("#switch_filter").checked = localCfg.filter;
-  Q("#input_worktime_begin").value = localCfg.worktime_begin || "08:30";
+  Q("#input_worktime_begin").value = localCfg.worktime_begin || "09:00";
   Q("#input_alert_forward").value = localCfg.alert_forward || 5;
+  records = localCfg.records || [];
   this.processDingTalkInput();
 }
 // 监听 Q("#input_dingtalk") 文本变化
@@ -84,6 +86,7 @@ function setLocalCfg() {
     filter: Q("#switch_filter").checked,
     worktime_begin: Q("#input_worktime_begin").value,
     alert_forward: Q("#input_alert_forward").value,
+    records,
   };
   localStorage.setItem(LOCAL_STORAGE_KEY.DINGTALK_CFG, JSON.stringify(cfg));
 }
@@ -124,7 +127,14 @@ function processDingTalkWorktime(
   Q("#input_date_range").style.display = filter ? "none" : "";
   const matches = Array.from(content.matchAll(
     /(\d{2}):(\d{2}) (上班|下班)打卡·成功班次时间(\d{2})月(\d{2})日 \d{2}:\d{2}.*?(\d{4})年(\d{2})月(\d{2})日/g
-  )).toSorted((a, b) => {
+  ));
+  records.forEach((record) => {
+    const {date, time, type} = record;
+    const [hour, minute] = time.split(":").map((v) => +v);
+    const [year, month, day] = date.split("-").map((v) => +v);
+    matches.push(["", hour, minute, type, month, day, year]);
+  });
+  matches.sort((a, b) => {
     const [hourA, minuteA, typeA, monthA, dayA, yearA] = a.slice(1);
     const [hourB, minuteB, typeB, monthB, dayB, yearB] = b.slice(1);
     return yearA - yearB ||
@@ -144,9 +154,14 @@ function processDingTalkWorktime(
     .map((v) => +v);
   for (const match of matches) {
     const args = match.slice(1);
+    /** 是否为补卡 */
+    const isRemake = match[0] === "";
     const [hour, minute, type, month, day, year] = args;
     let time = new Date(year, month - 1, day, hour, minute);
     if (type === "上班") {
+      if (begTime && isSameDay(begTime, time)) {
+        continue;
+      }
       if (isNewDay) {
         history.pop();
       }
@@ -168,6 +183,7 @@ function processDingTalkWorktime(
         begTime,
         realBegTime: time,
         workTimeInMinutes: 0,
+        begTimeRemake: isRemake,
       };
       history.push(tmp);
     } else {
@@ -185,6 +201,7 @@ function processDingTalkWorktime(
       const workTimeInMinutes = Math.ceil(workTime / 1000 / 60);
       tmp.endTime = endTime;
       tmp.workTimeInMinutes = workTimeInMinutes;
+      tmp.endTimeRemake = isRemake;
       isNewDay = false;
     }
   }
@@ -218,6 +235,8 @@ function processDingTalkWorktime(
     const {
       begTime,
       endTime,
+      begTimeRemake,
+      endTimeRemake,
       workTimeInMinutes,
       realBegTime
     } = item;
@@ -233,11 +252,11 @@ function processDingTalkWorktime(
       "";
     if (realBegTime != begTime) {
       addStatus(
-        `[${date}] ${formatTime(begTime)}<span class="text-danger">[${formatTime(realBegTime)}]</span>~${formatTime(endTime)} ${total}`
+        `[${date}] ${formatTime(begTime, begTimeRemake)}<span class="text-danger">[${formatTime(realBegTime, begTimeRemake)}]</span>~${formatTime(endTime, endTimeRemake)} ${total}`
       );
     } else {
       addStatus(
-        `<span class="${isToday ? "text-success" : ""}">[${date}] ${formatTime(begTime)}~${formatTime(endTime)} ${total}</span>`
+        `<span class="${isToday ? "text-success" : ""}">[${date}] ${formatTime(begTime, begTimeRemake)}~${formatTime(endTime, endTimeRemake)} ${total}</span>`
       );
     }
   });
