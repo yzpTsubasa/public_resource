@@ -49,8 +49,8 @@
             /* 边框 */
             border: 1px solid #ccc;
             padding: 0.5em;
-            margin-bottom: 3em;
         }
+
         .delete_record {
             cursor: pointer;
         }
@@ -103,7 +103,7 @@
             </div>
             <hr>
             <!-- 查看补卡记录 -->
-            <button type="button" class="btn btn-secondary" id="btn_records">手动补卡</button>
+            <button type="button" class="btn btn-secondary" id="btn_records">补卡</button>
             <!-- 补卡对话框 -->
             <div id="records_wrap">
                 <!-- 日期 时间 类型 操作 -->
@@ -115,17 +115,20 @@
                 </div>
                 <div class="records_add_wrap">
                     <div class="input-group mb-3">
-                    <input type="date" id="input_record_date" class="form-control" value="">
-                    <input type="time" id="input_record_time" class="form-control" value="">
-                </div>
-                <div class="input-group mb-3">
-                    <!-- 类型选择 -->
-                    <select id="input_record_type" class="form-select">
-                        <option value="上班">上班</option>
-                        <option value="下班">下班</option>
-                    </select>
-                    <button type="button" class="btn btn-primary" id="btn_add_record">添加</button>
-                </div>
+                        <label class="input-group-text">时间</label>
+                        <input type="time" id="input_record_time" class="form-control" value="">
+                        <input type="date" id="input_record_date" class="form-control" value="">
+                    </div>
+                    <div class="input-group mb-3">
+                        <label class="input-group-text">类型</label>
+                        <!-- 类型选择 -->
+                        <select id="input_record_type" class="form-select">
+                            <option value="上班">上班</option>
+                            <option value="下班">下班</option>
+                            <option value="" selected hidden></option>
+                        </select>
+                        <button type="button" class="btn btn-primary" id="btn_add_record">添加</button>
+                    </div>
                 </div>
             </div>
         </div>
