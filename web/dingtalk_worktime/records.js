@@ -18,9 +18,9 @@ function UpdateRecordVisibility() {
 }
 
 function deleteRecord(index) {
-    const record = records[index];
-    const confirmed = confirm(`删除 ${record.date} ${record.time} 的 ${record.type} 记录？`);
-    if (!confirmed) return;
+    // const record = records[index];
+    // const confirmed = confirm(`删除 ${record.date} ${record.time} 的 ${record.type} 记录？`);
+    // if (!confirmed) return;
     records.splice(index, 1);
     UpdateRecordList();
     processDingTalkInput();
@@ -37,9 +37,9 @@ function UpdateRecordList() {
         const type = record.type;
         const delete_btn = `<span class="badge bg-danger delete_record" onclick="deleteRecord(${records.indexOf(record)})">删除</span>`;
         return `<div class="record_item">
-                    <p class="record_date">${date} ${time}</p>
-                    <p class="record_type">${type}</p>
-                    <p>${delete_btn}</p>
+                    <div class="record_date">${date} ${time}</div>
+                    <div class="record_type">${type}</div>
+                    <div>${delete_btn}</div>
                 </div>`;
     }).join("");
     Q("#records_list").innerHTML = records_html;
@@ -66,23 +66,28 @@ Q("#btn_add_record").addEventListener("click", function () {
         type,
     };
     if (!time) {
-        alert("请选择时间");
+        ShowError("请选择时间");
         return;
     }
     if (!date) {
-        alert("请选择日期");
+        ShowError("请选择日期");
         return;
     }
     if (!type) {
-        alert("请选择类型");
+        ShowError("请选择类型");
         return;
     }
     const exisitingRecord = records.find(r => r.time === time && r.date === date && r.type === type);
     if (exisitingRecord) {
-        alert("该记录已存在");
+        ShowError("该记录已存在");
         return;
     }
+    ShowError("");
     records.push(record);
     UpdateRecordList();
     processDingTalkInput();
 });
+
+function ShowError(msg) {
+    Q("#records_error").textContent = msg;
+}
