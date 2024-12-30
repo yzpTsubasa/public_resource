@@ -19,10 +19,9 @@
         #records_wrap {
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
             position: absolute;
-            top: 10rem;
-            bottom: 4rem;
+            top: 0;
+            bottom: 0;
             left: 0;
             background-color: white;
             z-index: 1000;
@@ -31,8 +30,12 @@
             /* 边框 */
             border: 1px solid #ccc;
             width: 100%;
-            padding: 2em 1em;
+            padding: 1em 0.5em;
             overflow: auto;
+        }
+
+        #main_wrap {
+            position: relative;
         }
 
         .record_item {
@@ -42,7 +45,6 @@
             align-items: center;
             /* 背景圆角，阴影 */
             border-radius: 0.5em;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
             padding: 0.5em;
             /* 边框 */
             border: 1px solid #ccc;
@@ -51,45 +53,84 @@
         .delete_record {
             cursor: pointer;
         }
+        #switch_filter_week {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
     </style>
 </head>
 
 <body>
     <div class="card" style="width: 25rem;">
         <div class="card-body">
-            <h2 class="text-light-emphasis">钉钉打卡统计</h2>
-            <div class="input-group mb-3">
-                <label class="input-group-text">每天需打卡时长(小时)</label>
-                <input type="number" id="input_worktime_per_day" class="form-control" value="9.0" step="0.5">
-            </div>
-            <div class="input-group mb-3">
-                <label class="input-group-text">有效打卡起始时间</label>
-                <input type="time" id="input_worktime_begin" class="form-control" value="08:30">
-            </div>
-            <div class="input-group mb-3">
-                <input type="text" id="input_dingtalk" class="form-control" placeholder="输入打卡记录">
-                <button type="button" class="btn" id="btn_reset">清空</button>
-                <button type="button" class="btn btn-primary" id="btn_read_clipboard" data-bs-toggle="tooltip"
-                    data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="需要剪贴板权限">读取剪贴板</button>
-            </div>
-            <div id="total_wrap" class="text-secondary">
-                <p>累计工时: <span id="label_total"></span></p>
-                <p>今日工时: <span id="label_today"></span><span id="label_need"></span></p>
-            </div>
-            <div id="left_wrap" style="display: none;">
-                <p>建议打卡: <span id="label_recommend"></span></p>
-                <p><span id="label_off_duty"></span></p>
-                <p><span id="label_off_duty_alert"></span></p>
+            <div id="main_wrap">
+                <h2 class="text-light-emphasis">钉钉打卡统计</h2>
                 <div class="input-group mb-3">
-                    <label class="input-group-text">提前提醒(分钟)</label>
-                    <input type="number" id="input_alert_forward" class="form-control" value="0" step="1" min="0">
+                    <label class="input-group-text">每天需打卡时长(小时)</label>
+                    <input type="number" id="input_worktime_per_day" class="form-control" value="9.0" step="0.5">
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text">有效打卡起始时间</label>
+                    <input type="time" id="input_worktime_begin" class="form-control" value="08:30">
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" id="input_dingtalk" class="form-control" placeholder="输入打卡记录">
+                    <button type="button" class="btn" id="btn_reset">清空</button>
+                    <button type="button" class="btn btn-primary" id="btn_read_clipboard" data-bs-toggle="tooltip"
+                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                        data-bs-title="需要剪贴板权限">读取剪贴板</button>
+                </div>
+                <div id="total_wrap" class="text-secondary">
+                    <p>累计工时: <span id="label_total"></span></p>
+                    <p>今日工时: <span id="label_today"></span><span id="label_need"></span></p>
+                </div>
+                <div id="left_wrap" style="display: none;">
+                    <p>建议打卡: <span id="label_recommend"></span></p>
+                    <p><span id="label_off_duty"></span></p>
+                    <p><span id="label_off_duty_alert"></span></p>
+                    <div class="input-group mb-3">
+                        <label class="input-group-text">提前提醒(分钟)</label>
+                        <input type="number" id="input_alert_forward" class="form-control" value="0" step="1" min="0">
+                    </div>
+                </div>
+                <hr>
+                <!-- 补卡对话框 -->
+                <div id="records_wrap">
+                    <!-- 日期 时间 类型 操作 -->
+                    <div id="records_list">
+                    </div>
+                    <!-- 无记录提示 -->
+                    <div id="records_empty" class="text-secondary">
+                        <p>暂无补卡记录</p>
+                    </div>
+                    <div class="records_add_wrap">
+                        <div class="input-group mb-3">
+                            <label class="input-group-text">时间</label>
+                            <input type="time" id="input_record_time" class="form-control" value="">
+                            <input type="date" id="input_record_date" class="form-control" value="">
+                        </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text">类型</label>
+                            <!-- 类型选择 -->
+                            <select id="input_record_type" class="form-select">
+                                <option value="上班">上班</option>
+                                <option value="下班">下班</option>
+                                <option value="" selected hidden></option>
+                            </select>
+                            <button type="button" class="btn btn-primary" id="btn_add_record">添加</button>
+                        </div>
+                        <!-- 错误提示 -->
+                        <div id="records_error" class="text-danger"></div>
+                    </div>
                 </div>
             </div>
-            <hr>
             <div class="text-secondary">
-                <div class="form-check form-switch">
+                <div class="form-check form-switch" id="switch_filter_week">
                     <input class="form-check-input" type="checkbox" role="switch" id="switch_filter" checked>
                     <label class="form-check-label" for="switch_filter">仅显示本周打卡记录</label>
+                    <!-- 查看补卡记录 -->
+                    <button type="button" class="btn btn-primary" id="btn_records">补卡</button>
                 </div>
                 <div class="form-input" id="input_date_range">
                     <input type="date" id="input_date_begin">~<input type="date" id="input_date_end">
@@ -99,37 +140,7 @@
                 </p>
             </div>
             <hr>
-            <!-- 查看补卡记录 -->
-            <button type="button" class="btn btn-secondary" id="btn_records">补卡</button>
-            <!-- 补卡对话框 -->
-            <div id="records_wrap">
-                <!-- 日期 时间 类型 操作 -->
-                <div id="records_list">
-                </div>
-                <!-- 无记录提示 -->
-                <div id="records_empty" class="text-secondary">
-                    <p>暂无补卡记录</p>
-                </div>
-                <div class="records_add_wrap">
-                    <div class="input-group mb-3">
-                        <label class="input-group-text">时间</label>
-                        <input type="time" id="input_record_time" class="form-control" value="">
-                        <input type="date" id="input_record_date" class="form-control" value="">
-                    </div>
-                    <div class="input-group mb-3">
-                        <label class="input-group-text">类型</label>
-                        <!-- 类型选择 -->
-                        <select id="input_record_type" class="form-select">
-                            <option value="上班">上班</option>
-                            <option value="下班">下班</option>
-                            <option value="" selected hidden></option>
-                        </select>
-                        <button type="button" class="btn btn-primary" id="btn_add_record">添加</button>
-                    </div>
-                    <!-- 错误提示 -->
-                     <div id="records_error" class="text-danger"></div>
-                </div>
-            </div>
+
         </div>
         <script src="../libs/bootstrap.bundle.min.js"></script>
         <script src="./helper.js"></script>
