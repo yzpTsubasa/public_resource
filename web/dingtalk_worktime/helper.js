@@ -58,13 +58,21 @@ function getDateWeek(date) {
 
 /** 判断两个日期是否为同一周内的日期 */
 function isSameWeek(date1, date2) {
-  if (!date1 || !date2) return false;
-  const year1 = date1.getFullYear();
-  const year2 = date2.getFullYear();
-  if (year1 !== year2) return false;
-  const week1 = getDateWeek(date1);
-  const week2 = getDateWeek(date2);
-  return week1 === week2;
+  // 获取两个日期的周一日期
+  const monday1 = getMonday(new Date(date1));
+  const monday2 = getMonday(new Date(date2));
+  // 比较两个周一日期是否相同
+  return monday1.getTime() === monday2.getTime();
+}
+
+function getMonday(date) {
+  // 获取当前日期的星期几（0表示周日，1表示周一，...，6表示周六）
+  const day = date.getDay();
+  // 计算当前日期到本周一的偏移量
+  const diff = (day + 6) % 7;
+  const monday = new Date(date.getTime() - diff * 24 * 60 * 60 * 1000);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
 }
 
 function formatMilliSeconds(milliseconds, full, signed = false) {
