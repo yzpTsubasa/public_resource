@@ -1,34 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List</title>
-    <link rel="icon" type="image/x-icon" href="./favicon.png">
-    <link rel="stylesheet" href="../libs/bootstrap.min.css">
-    <link rel="stylesheet" href="index.css">
+    <title>待办事项</title>
+    <link rel="icon" type="image/png" href="todo.png">
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <div class="card" style="width: 25rem;">
-        <h2 class="text-light-emphasis">Todo List</h2>
-        <div class="progress" role="progressbar">
-            <div class="progress-bar" style="width: 0%">0%</div>
+    <div class="todo-container">
+        <h1>待办事项</h1>
+        <div class="control-panel">
+            <div class="sort-container">
+                <div class="sort-buttons">
+                    <button id="sort-create-time" class="sort-btn active" data-field="createTime">
+                        创建时间
+                        <span class="sort-icon">↓</span>
+                    </button>
+                    <button id="sort-complete-time" class="sort-btn" data-field="completeTime">
+                        完成时间
+                        <span class="sort-icon">↓</span>
+                    </button>
+                </div>
+                <div class="toggle-container">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="hide-completed">
+                        <span>隐藏已完成</span>
+                    </label>
+                </div>
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-around; align-items: center;">
-            <div id="input-todo" class="shadow p-3 bg-body-tertiary rounded" style="width: 100%;"></div>
-            <button type="button" class="btn-close" id="btn-reset"></button>
+        <div class="input-container">
+            <textarea id="todo-input" placeholder="可粘贴图片，回车或者点击按钮添加。(shift+enter添加换行)"></textarea>
+            <div class="button-row">
+                <button id="add-btn">添加</button>
+                <button id="clear-completed" class="clear-btn">清除已完成</button>
+            </div>
         </div>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-success" id="btn_add">添加</button>
-            <button type="button" class="btn btn-secondary" id="btn_all_done">完成所有</button>
-            <button type="button" class="btn btn-danger" id="btn_remove_done">清除完成</button>
+        <div id="todo-list">
+            <!-- 待办事项将在这里动态添加 -->
         </div>
-        <div class="todo-list"></div>
     </div>
-    <script src="../libs/bootstrap.bundle.min.js"></script>
-    <script src="index.js"></script>
-</body>
 
-</html>
+    <!-- 图片预览模态框 -->
+    <div class="preview-modal">
+        <div class="preview-content">
+            <img class="preview-image" src="" alt="预览图片">
+            <div class="preview-counter"></div>
+            <div class="preview-nav">
+                <button class="preview-prev">←</button>
+                <button class="preview-next">→</button>
+            </div>
+            <button class="preview-close">×</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
