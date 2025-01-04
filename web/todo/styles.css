@@ -133,6 +133,7 @@ body {
     position: relative;
     max-width: 90%;
     max-height: 90%;
+    overflow: visible;
 }
 
 .preview-image {
@@ -141,6 +142,10 @@ body {
     object-fit: contain;
     width: auto;
     height: auto;
+    transition: transform 0.1s ease;
+    transform-origin: center center;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .preview-nav {
@@ -155,30 +160,60 @@ body {
 }
 
 .preview-nav button {
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
+    background: rgba(0, 0, 0, 0.6);
     color: white;
+    border: none;
     padding: 15px 20px;
+    font-size: 24px;
     cursor: pointer;
-    border-radius: 5px;
-    font-size: 18px;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    position: absolute;
+    border-radius: 4px;
+    opacity: 0;
+}
+
+.preview-modal:hover .preview-nav button {
+    opacity: 1;
+}
+
+.preview-nav button {
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-nav button:hover {
-    background-color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .preview-close {
-    position: absolute;
+    position: fixed;
     top: 20px;
     right: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    padding: 0;
+    transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.6);
     color: white;
-    background: none;
     border: none;
-    font-size: 24px;
+    border-radius: 4px;
     cursor: pointer;
-    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.preview-modal .preview-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
 }
 
 .preview-counter {
@@ -186,10 +221,10 @@ body {
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
+    padding: 8px 15px;
+    border-radius: 20px;
     font-size: 14px;
 }
 
@@ -802,4 +837,91 @@ body {
 .time-value.unfinished {
     color: #999;
     font-style: italic;
+}
+
+/* 修改预览模态框的按钮样式 */
+.preview-modal .preview-nav button,
+.preview-modal .preview-close {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: absolute;
+    border-radius: 4px;
+    opacity: 0;
+}
+
+/* 当鼠标移入预览模态框时显示按钮 */
+.preview-modal:hover .preview-nav button,
+.preview-modal:hover .preview-close {
+    opacity: 1;
+}
+
+/* 左右导航按钮的共同样式 */
+.preview-modal .preview-nav button {
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 上一张按钮 */
+.preview-modal .preview-prev {
+    left: 20px;
+}
+
+/* 下一张按钮 */
+.preview-modal .preview-next {
+    right: 20px;
+}
+
+/* 关闭按钮 */
+.preview-modal .preview-close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    padding: 0;
+    transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* 鼠标悬停效果 */
+.preview-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+/* 图片计数器样式 */
+.preview-modal .preview-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+/* 当按钮不可见时的样式 */
+.preview-modal .preview-nav button[style*="visibility: hidden"] {
+    display: none;
 } 

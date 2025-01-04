@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSortField = 'createTime';
     let currentSortOrder = 'desc';
     let hideCompleted = false;
+    let currentScale = 1;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
 
     // 从本地存储加载待办事项
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
@@ -218,17 +221,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 添加新的待办事项
     function addTodo() {
-        const text = todoInput.value;
-        if (text && text.trim()) {  // 只检查是否全为空格
-            todos.push({
-                text,  // 保存原始文本
+        const todoText = todoInput.value.trim();
+        if (todoText) {
+            const todo = {
+                text: todoText,  // 直接使用文本，不进行 HTML 转换
                 completed: false,
-                createTime: Date.now(),
-                completeTime: null
-            });
-            todoInput.value = '';  // 清空输入框
-            saveTodos();
+                id: Date.now()
+            };
+            
+            todos.push(todo);
             renderTodos();
+            saveTodos();
+            todoInput.value = '';
         }
     }
 
@@ -236,6 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function openPreview(todoText, clickedImgSrc) {
         currentImages = todoText.match(/\[img:[^\]]*\]/g)?.map(img => img.slice(5, -1)) || [];
         currentImageIndex = currentImages.indexOf(clickedImgSrc);
+        
+        // 重置缩放和位置
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        updateImageTransform();
         
         updatePreviewImage();
         previewModal.classList.add('active');
@@ -247,11 +257,23 @@ document.addEventListener('DOMContentLoaded', () => {
         previewCounter.textContent = `${currentImageIndex + 1}/${currentImages.length}`;
         prevButton.style.visibility = currentImageIndex > 0 ? 'visible' : 'hidden';
         nextButton.style.visibility = currentImageIndex < currentImages.length - 1 ? 'visible' : 'hidden';
+        
+        // 重置缩放和位置
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        updateImageTransform();
     }
 
     function closePreview() {
         previewModal.classList.remove('active');
         document.removeEventListener('keydown', handleKeyPress);
+        
+        // 重置缩放和位置
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        updateImageTransform();
     }
 
     function handleKeyPress(e) {
@@ -286,21 +308,137 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 修改处理 HTML 粘贴的相关代码
+    function processHtmlPaste(html, input) {
+        console.log(html);
+        
+        // 创建一个临时的 div 来解析 HTML 结构
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+        tempDiv.innerHTML = html;
+        
+        // 处理所有图片元素并获取处理后的 HTML
+        const images = tempDiv.getElementsByTagName('img');
+        let pendingImages = Array.from(images).length;
+        
+        if (pendingImages === 0) {
+            document.body.removeChild(tempDiv);
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            insertCleanText(div);
+            return;
+        }
+        
+        for (let img of images) {
+            const src = img.getAttribute('src');
+            if (src && src.startsWith('file://')) {
+                // 统一将反斜杠转换为正斜杠
+                const normalizedSrc = src.replace(/\\/g, '/');
+                // 分离路径和文件名
+                const lastSlashIndex = normalizedSrc.lastIndexOf('/');
+                if (lastSlashIndex !== -1) {
+                    const path = normalizedSrc.substring(0, lastSlashIndex + 1);
+                    const filename = normalizedSrc.substring(lastSlashIndex + 1);
+                    // 对文件名进行 encodeURI 处理
+                    const encodedFilename = encodeURI(filename);
+                    // 构建 http URL
+                    const httpUrl = path.replace('file://', 'http://localhost:18686/file') + encodedFilename;
+                    
+                    // 下载图片并转换为 base64
+                    fetch(httpUrl)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const base64Data = event.target.result;
+                                img.outerHTML = `[img:${base64Data}]`;
+                                
+                                // 检查是否所有图片都处理完成
+                                pendingImages--;
+                                if (pendingImages === 0) {
+                                    const processedHtml = tempDiv.innerHTML;
+                                    document.body.removeChild(tempDiv);
+                                    
+                                    const div = document.createElement('div');
+                                    div.innerHTML = processedHtml;
+                                    insertCleanText(div);
+                                }
+                            };
+                            reader.readAsDataURL(blob);
+                        })
+                        .catch(error => {
+                            console.error('Error downloading image:', error);
+                            pendingImages--;
+                            if (pendingImages === 0) {
+                                const processedHtml = tempDiv.innerHTML;
+                                document.body.removeChild(tempDiv);
+                                
+                                const div = document.createElement('div');
+                                div.innerHTML = processedHtml;
+                                insertCleanText(div);
+                            }
+                        });
+                }
+            } else {
+                pendingImages--;
+                if (pendingImages === 0) {
+                    const processedHtml = tempDiv.innerHTML;
+                    document.body.removeChild(tempDiv);
+                    
+                    const div = document.createElement('div');
+                    div.innerHTML = processedHtml;
+                    insertCleanText(div);
+                }
+            }
+        }
+        
+        // 插入处理后的文本
+        function insertCleanText(div) {
+            // 获取处理后的文本内容，不进行 HTML 转换
+            const cleanText = div.textContent;
+            
+            // 在光标位置插入文本
+            const cursorPosition = input.selectionStart;
+            const textBefore = input.value.substring(0, cursorPosition);
+            const textAfter = input.value.substring(cursorPosition);
+            input.value = textBefore + cleanText + textAfter;
+            console.log(input.value);
+            // 更新光标位置
+            input.selectionStart = input.selectionEnd = cursorPosition + cleanText.length;
+        }
+    }
+
+    // 修改 todoInput 的粘贴事件处理
     todoInput.addEventListener('paste', (e) => {
         const items = e.clipboardData.items;
-        for (let item of items) {
-            if (item.type.indexOf('image') !== -1) {
-                e.preventDefault();
-                const file = item.getAsFile();
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const imageData = event.target.result;
-                    const cursorPosition = todoInput.selectionStart;
-                    const textBefore = todoInput.value.substring(0, cursorPosition);
-                    const textAfter = todoInput.value.substring(cursorPosition);
-                    todoInput.value = textBefore + `[img:${imageData}]` + textAfter;
-                };
-                reader.readAsDataURL(file);
+        let handled = false;
+
+        // 首先检查是否有 HTML 内容
+        const html = e.clipboardData.getData('text/html');
+        if (html) {
+            e.preventDefault();
+            handled = true;
+            processHtmlPaste(html, todoInput);
+        }
+
+        // 如果没有处理 HTML，则检查是否有图片
+        if (!handled) {
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imageData = event.target.result;
+                        const cursorPosition = todoInput.selectionStart;
+                        const textBefore = todoInput.value.substring(0, cursorPosition);
+                        const textAfter = todoInput.value.substring(cursorPosition);
+                        todoInput.value = textBefore + `[img:${imageData}]` + textAfter;
+                    };
+                    reader.readAsDataURL(file);
+                    break;
+                }
             }
         }
     });
@@ -360,22 +498,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // 在主内容区域的位置插入编辑容器
         mainContent.parentNode.insertBefore(editContainer, mainContent);
         
-        // 支持图片粘贴
+        // 修改编辑区域的粘贴事件处理
         editInput.addEventListener('paste', (e) => {
             const items = e.clipboardData.items;
-            for (let item of items) {
-                if (item.type.indexOf('image') !== -1) {
-                    e.preventDefault();
-                    const file = item.getAsFile();
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const imageData = event.target.result;
-                        const cursorPosition = editInput.selectionStart;
-                        const textBefore = editInput.value.substring(0, cursorPosition);
-                        const textAfter = editInput.value.substring(cursorPosition);
-                        editInput.value = textBefore + `[img:${imageData}]` + textAfter;
-                    };
-                    reader.readAsDataURL(file);
+            let handled = false;
+
+            // 首先检查是否有 HTML 内容
+            const html = e.clipboardData.getData('text/html');
+            if (html) {
+                e.preventDefault();
+                handled = true;
+                processHtmlPaste(html, editInput);
+            }
+
+            // 如果没有处理 HTML，则检查是否有图片
+            if (!handled) {
+                for (let item of items) {
+                    if (item.type.indexOf('image') !== -1) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const imageData = event.target.result;
+                            const cursorPosition = editInput.selectionStart;
+                            const textBefore = editInput.value.substring(0, cursorPosition);
+                            const textAfter = editInput.value.substring(cursorPosition);
+                            editInput.value = textBefore + `[img:${imageData}]` + textAfter;
+                        };
+                        reader.readAsDataURL(file);
+                        break;
+                    }
                 }
             }
         });
@@ -652,6 +804,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 添加清除按钮的事件监听器
     clearCompletedBtn.addEventListener('click', clearCompleted);
+
+    // 添加更新图片变换的函数
+    function updateImageTransform() {
+        previewImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+    }
+
+    // 修改鼠标滚轮事件处理
+    previewImage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY;
+        const scaleChange = delta > 0 ? 0.9 : 1.1;  // 缩小或放大 10%
+        
+        // 计算新的缩放值，并限制在合理范围内
+        const newScale = Math.min(Math.max(currentScale * scaleChange, 0.1), 10);
+        
+        // 获取图片的变换前位置和尺寸
+        const rect = previewImage.getBoundingClientRect();
+        
+        // 计算鼠标在图片上的相对位置（0-1之间的值）
+        const mouseXRatio = (e.clientX - rect.left) / rect.width;
+        const mouseYRatio = (e.clientY - rect.top) / rect.height;
+        
+        // 计算图片缩放前后的尺寸差
+        const oldWidth = rect.width;
+        const oldHeight = rect.height;
+        const newWidth = oldWidth * (newScale / currentScale);
+        const newHeight = oldHeight * (newScale / currentScale);
+        const deltaWidth = newWidth - oldWidth;
+        const deltaHeight = newHeight - oldHeight;
+        
+        // 根据鼠标位置计算新的偏移量
+        translateX -= deltaWidth * mouseXRatio;
+        translateY -= deltaHeight * mouseYRatio;
+        
+        currentScale = newScale;
+        updateImageTransform();
+    });
+
+    // 修改拖动功能
+    previewImage.addEventListener('mousedown', (e) => {
+        if (e.button === 0) {  // 左键
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            previewImage.style.cursor = 'move';
+        }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateImageTransform();
+        }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+        if (e.button === 0) {  // 左键
+            isDragging = false;
+            previewImage.style.cursor = 'default';
+        }
+    });
 
     // 初始化
     loadSettings();  // 先加载设置
