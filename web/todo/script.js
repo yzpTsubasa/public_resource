@@ -482,27 +482,41 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             handled = true;
             processHtmlPaste(html, todoInput);
-            // 不需要在这里调用 addTodo，因为 insertCleanText 会处理
         }
 
         // 如果没有处理 HTML，则检查是否有图片
         if (!handled) {
+            e.preventDefault();
+            let pendingImages = 0;
+            let combinedText = todoInput.value;
+            
+            // 先计算有多少张图片
             for (let item of items) {
                 if (item.type.indexOf('image') !== -1) {
-                    e.preventDefault();
+                    pendingImages++;
+                }
+            }
+            
+            // 如果没有图片，直接返回
+            if (pendingImages === 0) return;
+            
+            // 处理所有图片
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
                     const file = item.getAsFile();
                     const reader = new FileReader();
                     reader.onload = function(event) {
                         const imageData = event.target.result;
-                        const cursorPosition = todoInput.selectionStart;
-                        const textBefore = todoInput.value.substring(0, cursorPosition);
-                        const textAfter = todoInput.value.substring(cursorPosition);
-                        todoInput.value = textBefore + `[img:${imageData}]` + textAfter;
-                        // 图片加载完成后自动添加
-                        addTodo();
+                        combinedText += `[img:${imageData}]`;
+                        
+                        pendingImages--;
+                        // 当所有图片都处理完成时，一次性添加
+                        if (pendingImages === 0) {
+                            todoInput.value = combinedText;
+                            addTodo();
+                        }
                     };
                     reader.readAsDataURL(file);
-                    break;
                 }
             }
         }
