@@ -127,15 +127,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const completedContainer = document.createElement('div');
             completedContainer.className = 'completed-container';
             
+            // 根据保存的设置设置初始折叠状态
+            const isCollapsed = loadSettings();
+            if (isCollapsed) {
+                completedContainer.classList.add('collapsed');
+            }
+            
+            // 修改折叠图标
+            const toggleIcon = completedHeader.querySelector('.toggle-icon');
+            toggleIcon.textContent = isCollapsed ? '▶' : '▼';
+            
             // 渲染已完成的待办事项
             completedTodos.forEach((todo, index) => {
                 const todoItem = renderTodoItem(todo, uncompletedTodos.length + index);
                 completedContainer.appendChild(todoItem);
             });
             
-            // 添加折叠/展开功能
+            // 修改折叠功能
             function toggleCollapse(e) {
-                // 如果点击的是清除按钮或其祖先元素是清除按钮，不触发折叠
                 if (e.target.closest('.clear-btn')) {
                     return;
                 }
@@ -143,6 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedContainer.classList.toggle('collapsed');
                 const toggleIcon = completedHeader.querySelector('.toggle-icon');
                 toggleIcon.textContent = completedContainer.classList.contains('collapsed') ? '▶' : '▼';
+                
+                // 保存设置
+                saveSettings();
             }
             
             // 点击整个header区域都可以触发折叠/展开
@@ -744,22 +756,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // 从本地存储加载设置
     function loadSettings() {
         const settings = JSON.parse(localStorage.getItem('todoSettings')) || {
-            sortField: 'createTime',  // 现在只有创建时间一种排序
-            sortOrder: 'desc'
+            sortField: 'createTime',
+            sortOrder: 'desc',
+            completedCollapsed: false  // 添加折叠状态的默认值
         };
         
-        currentSortField = 'createTime';  // 强制使用创建时间排序
+        currentSortField = 'createTime';
         currentSortOrder = settings.sortOrder;
         
         // 更新 UI 状态
         updateSortButtons();
+        
+        return settings.completedCollapsed;  // 返回折叠状态
     }
 
     // 保存设置到本地存储
     function saveSettings() {
         const settings = {
             sortField: currentSortField,
-            sortOrder: currentSortOrder
+            sortOrder: currentSortOrder,
+            completedCollapsed: document.querySelector('.completed-container')?.classList.contains('collapsed') || false
         };
         localStorage.setItem('todoSettings', JSON.stringify(settings));
     }
