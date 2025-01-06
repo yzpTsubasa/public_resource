@@ -938,6 +938,7 @@ body {
     justify-content: space-between;
     padding: 10px 0;
     color: #666;
+    cursor: pointer;
 }
 
 .completed-actions {
@@ -993,4 +994,18 @@ body {
 .completed-container .todo-item {
     opacity: 0.8;
     background-color: #f8f8f8;
+}
+
+/* 清除按钮不显示手型光标 */
+.completed-actions .clear-btn {
+    cursor: pointer;
+}
+
+/* 移除不需要的光标样式 */
+.completed-title {
+    cursor: inherit;
+}
+
+.toggle-completed {
+    cursor: inherit;
 } 

@@ -134,12 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             // 添加折叠/展开功能
-            completedHeader.querySelector('.toggle-completed').addEventListener('click', () => {
+            function toggleCollapse(e) {
+                // 如果点击的是清除按钮或其祖先元素是清除按钮，不触发折叠
+                if (e.target.closest('.clear-btn')) {
+                    return;
+                }
+                
                 completedContainer.classList.toggle('collapsed');
                 const toggleIcon = completedHeader.querySelector('.toggle-icon');
                 toggleIcon.textContent = completedContainer.classList.contains('collapsed') ? '▶' : '▼';
-            });
+            }
             
+            // 点击整个header区域都可以触发折叠/展开
+            completedHeader.addEventListener('click', toggleCollapse);
+            
+            // 添加清除按钮的事件监听
             completedHeader.querySelector('.clear-btn').addEventListener('click', clearCompleted);
             
             completedGroup.appendChild(completedHeader);
@@ -256,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const todoText = todoInput.value.trim();
         if (todoText) {
             const todo = {
-                text: todoText,  // 直接使用文本，不进行 HTML 转换
+                text: todoText,
                 completed: false,
                 createTime: Date.now(),
                 id: Date.now()
@@ -658,10 +667,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 修改完成状态的处理
     function toggleComplete(index, completed) {
-        todos[index].completed = completed;
-        todos[index].completeTime = completed ? Date.now() : null;
-        saveTodos();
-        renderTodos();
+        // 获取未完成和已完成的待办事项
+        const uncompletedTodos = todos.filter(todo => !todo.completed);
+        const completedTodos = todos.filter(todo => todo.completed);
+        
+        // 根据当前项目的完成状态和索引找到正确的待办事项
+        let todo;
+        let realIndex;
+        if (completed) {
+            // 如果是标记为完成，说明是在未完成列表中
+            todo = uncompletedTodos[index];
+            realIndex = todos.findIndex(t => t.id === todo.id);
+        } else {
+            // 如果是标记为未完成，说明是在已完成列表中
+            todo = completedTodos[index - uncompletedTodos.length];
+            realIndex = todos.findIndex(t => t.id === todo.id);
+        }
+        
+        // 更新待办事项状态
+        if (realIndex !== -1) {
+            todos[realIndex].completed = completed;
+            todos[realIndex].completeTime = completed ? Date.now() : null;
+            saveTodos();
+            renderTodos();
+        }
     }
 
     // 修改排序函数
