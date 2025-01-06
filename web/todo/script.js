@@ -9,13 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButton = previewModal.querySelector('.preview-close');
     const previewCounter = previewModal.querySelector('.preview-counter');
     const sortButtons = document.querySelectorAll('.sort-btn');
-    const hideCompletedCheckbox = document.getElementById('hide-completed');
     const clearCompletedBtn = document.getElementById('clear-completed');
     let currentImages = [];
     let currentImageIndex = 0;
     let currentSortField = 'createTime';
     let currentSortOrder = 'desc';
-    let hideCompleted = false;
     let currentScale = 1;
     let isDragging = false;
     let startX, startY, translateX = 0, translateY = 0;
@@ -82,14 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         sortTodos();
         todoList.innerHTML = '';
         
-        // 检查是否有已完成项
-        const hasCompletedItems = todos.some(todo => todo.completed);
-        
-        // 如果没有已完成项，强制取消隐藏
-        if (!hasCompletedItems && hideCompleted) {
-            hideCompleted = false;
-            saveSettings();
-        }
+        // 将待办事项分为未完成和已完成两组
+        const uncompletedTodos = todos.filter(todo => !todo.completed);
+        const completedTodos = todos.filter(todo => todo.completed);
         
         // 检查是否有任何待办事项
         if (todos.length === 0) {
@@ -104,114 +97,149 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        todos.forEach((todo, index) => {
-            if (hideCompleted && todo.completed) {
-                return;
-            }
-            
-            const todoItem = document.createElement('div');
-            todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-            
-            // 创建复选框
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = todo.completed;
-            checkbox.addEventListener('change', () => {
-                toggleComplete(index, checkbox.checked);
-            });
-            
-            // 创建主要内容区域（包含文本和图片）
-            const mainContent = document.createElement('div');
-            mainContent.className = 'main-content';
-            
-            // 创建一个内容包装器
-            const contentWrapper = document.createElement('div');
-            contentWrapper.className = 'content-wrapper';
-            mainContent.appendChild(contentWrapper);
-            
-            // 将双击事件监听器添加到主要内容区域
-            mainContent.addEventListener('dblclick', (e) => {
-                // 防止点击图片时触发编辑
-                if (!e.target.matches('img')) {
-                    startEditing(todoItem, todo, index);
-                }
-            });
-
-            // 处理文本和图片混合内容
-            const parts = todo.text.split(/(\[img:[^[\]]*\])/);
-            parts.forEach(part => {
-                if (part.startsWith('[img:') && part.endsWith(']')) {
-                    const imgSrc = part.slice(5, -1);
-                    const img = document.createElement('img');
-                    img.src = imgSrc;
-                    img.addEventListener('click', () => openPreview(todo.text, imgSrc));
-                    contentWrapper.appendChild(img);
-                } else if (part) {
-                    const textNode = document.createElement('div');
-                    textNode.textContent = part;
-                    contentWrapper.appendChild(textNode);
-                }
-            });
-            
-            // 创建右侧容器（包含按钮和时间）
-            const rightContainer = document.createElement('div');
-            rightContainer.className = 'right-container';
-            
-            // 创建按钮容器
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'button-container';
-            
-            // 添加编辑按钮
-            const editBtn = document.createElement('button');
-            editBtn.className = 'edit-btn';
-            editBtn.textContent = '编辑';
-            editBtn.addEventListener('click', () => {
-                startEditing(todoItem, todo, index);
-            });
-            buttonContainer.appendChild(editBtn);
-            
-            // 创建删除按钮
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.textContent = '删除';
-            deleteBtn.addEventListener('click', () => {
-                showDeleteConfirm(todoItem, index);
-            });
-            buttonContainer.appendChild(deleteBtn);
-            
-            // 创建时间显示
-            const timeContainer = document.createElement('div');
-            timeContainer.className = 'time-container';
-            
-            // 根据当前排序字段显示对应的时间
-            const timeLabel = currentSortField === 'createTime' ? '创建于：' : '完成于：';
-            const timestamp = currentSortField === 'createTime' ? todo.createTime : todo.completeTime;
-            
-            if (currentSortField === 'createTime' || timestamp) {
-                timeContainer.innerHTML = `
-                    <span class="time-label">${timeLabel}</span>
-                    <span class="time-value">${formatTime(timestamp)}</span>
-                `;
-            } else {
-                // 当按完成时间排序且项目未完成时，只显示"未完成"
-                timeContainer.innerHTML = `
-                    <span class="time-value unfinished">未完成</span>
-                `;
-            }
-            
-            // 组装右侧容器
-            rightContainer.appendChild(buttonContainer);
-            rightContainer.appendChild(timeContainer);
-            
-            todoItem.appendChild(checkbox);
-            todoItem.appendChild(mainContent);  // 使用 mainContent 替代直接的 content
-            todoItem.appendChild(rightContainer);
-            
+        // 渲染未完成的待办事项
+        uncompletedTodos.forEach((todo, index) => {
+            const todoItem = renderTodoItem(todo, index);
             todoList.appendChild(todoItem);
-            
-            // 添加鼠标样式提示可编辑
-            mainContent.style.cursor = 'pointer';
         });
+        
+        // 如果有已完成的待办事项，添加分组
+        if (completedTodos.length > 0) {
+            // 创建已完成分组标题
+            const completedGroup = document.createElement('div');
+            completedGroup.className = 'completed-group';
+            
+            const completedHeader = document.createElement('div');
+            completedHeader.className = 'completed-header';
+            completedHeader.innerHTML = `
+                <div class="completed-title">
+                    <span class="completed-icon">✓</span>
+                    已完成 (${completedTodos.length})
+                </div>
+                <button class="toggle-completed">
+                    <span class="toggle-icon">▼</span>
+                </button>
+            `;
+            
+            // 创建已完成项目容器
+            const completedContainer = document.createElement('div');
+            completedContainer.className = 'completed-container';
+            
+            // 渲染已完成的待办事项
+            completedTodos.forEach((todo, index) => {
+                const todoItem = renderTodoItem(todo, uncompletedTodos.length + index);
+                completedContainer.appendChild(todoItem);
+            });
+            
+            // 添加折叠/展开功能
+            completedHeader.querySelector('.toggle-completed').addEventListener('click', () => {
+                completedContainer.classList.toggle('collapsed');
+                const toggleIcon = completedHeader.querySelector('.toggle-icon');
+                toggleIcon.textContent = completedContainer.classList.contains('collapsed') ? '▶' : '▼';
+            });
+            
+            completedGroup.appendChild(completedHeader);
+            completedGroup.appendChild(completedContainer);
+            todoList.appendChild(completedGroup);
+        }
+    }
+
+    // 将渲染单个待办事项的逻辑抽取为独立函数
+    function renderTodoItem(todo, index) {
+        const todoItem = document.createElement('div');
+        todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        
+        // 创建复选框
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.completed;
+        checkbox.addEventListener('change', () => {
+            toggleComplete(index, checkbox.checked);
+        });
+        
+        // 创建主要内容区域（包含文本和图片）
+        const mainContent = document.createElement('div');
+        mainContent.className = 'main-content';
+        
+        // 创建一个内容包装器
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+        mainContent.appendChild(contentWrapper);
+        
+        // 将双击事件监听器添加到主要内容区域
+        mainContent.addEventListener('dblclick', (e) => {
+            // 防止点击图片时触发编辑
+            if (!e.target.matches('img')) {
+                startEditing(todoItem, todo, index);
+            }
+        });
+
+        // 处理文本和图片混合内容
+        const parts = todo.text.split(/(\[img:[^[\]]*\])/);
+        parts.forEach(part => {
+            if (part.startsWith('[img:') && part.endsWith(']')) {
+                const imgSrc = part.slice(5, -1);
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.addEventListener('click', () => openPreview(todo.text, imgSrc));
+                contentWrapper.appendChild(img);
+            } else if (part) {
+                const textNode = document.createElement('div');
+                textNode.textContent = part;
+                contentWrapper.appendChild(textNode);
+            }
+        });
+        
+        // 创建右侧容器（包含按钮和时间）
+        const rightContainer = document.createElement('div');
+        rightContainer.className = 'right-container';
+        
+        // 创建按钮容器
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
+        
+        // 添加编辑按钮
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.textContent = '编辑';
+        editBtn.addEventListener('click', () => {
+            startEditing(todoItem, todo, index);
+        });
+        buttonContainer.appendChild(editBtn);
+        
+        // 创建删除按钮
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = '删除';
+        deleteBtn.addEventListener('click', () => {
+            showDeleteConfirm(todoItem, index);
+        });
+        buttonContainer.appendChild(deleteBtn);
+        
+        // 创建时间显示
+        const timeContainer = document.createElement('div');
+        timeContainer.className = 'time-container';
+        
+        const timeLabel = '创建于：';
+        const timestamp = todo.createTime;
+        
+        timeContainer.innerHTML = `
+            <span class="time-label">${timeLabel}</span>
+            <span class="time-value">${formatTime(timestamp)}</span>
+        `;
+        
+        // 组装右侧容器
+        rightContainer.appendChild(buttonContainer);
+        rightContainer.appendChild(timeContainer);
+        
+        todoItem.appendChild(checkbox);
+        todoItem.appendChild(mainContent);  // 使用 mainContent 替代直接的 content
+        todoItem.appendChild(rightContainer);
+        
+        // 添加鼠标样式提示可编辑
+        mainContent.style.cursor = 'pointer';
+        
+        return todoItem;
     }
 
     // 保存待办事项到本地存储
@@ -404,23 +432,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const textBefore = input.value.substring(0, cursorPosition);
             const textAfter = input.value.substring(cursorPosition);
             input.value = textBefore + cleanText + textAfter;
-            console.log(input.value);
+            
             // 更新光标位置
             input.selectionStart = input.selectionEnd = cursorPosition + cleanText.length;
+            
+            // 自动添加待办事项
+            addTodo();
         }
     }
 
-    // 修改 todoInput 的粘贴事件处理
-    todoInput.addEventListener('paste', (e) => {
+    // 修改文档级别的粘贴事件处理
+    document.addEventListener('paste', (e) => {
+        // 如果粘贴发生在输入框或编辑框中，不做处理
+        if (e.target.matches('textarea, input')) {
+            return;
+        }
+
         const items = e.clipboardData.items;
         let handled = false;
 
-        // 首先检查是否有 HTML 内容
+        // 检查是否有 HTML 内容
         const html = e.clipboardData.getData('text/html');
         if (html) {
             e.preventDefault();
             handled = true;
             processHtmlPaste(html, todoInput);
+            // 不需要在这里调用 addTodo，因为 insertCleanText 会处理
         }
 
         // 如果没有处理 HTML，则检查是否有图片
@@ -436,6 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const textBefore = todoInput.value.substring(0, cursorPosition);
                         const textAfter = todoInput.value.substring(cursorPosition);
                         todoInput.value = textBefore + `[img:${imageData}]` + textAfter;
+                        // 图片加载完成后自动添加
+                        addTodo();
                     };
                     reader.readAsDataURL(file);
                     break;
@@ -624,15 +663,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 修改排序函数
     function sortTodos() {
         todos.sort((a, b) => {
-            let valueA, valueB;
-            
-            if (currentSortField === 'createTime') {
-                valueA = a.createTime;
-                valueB = b.createTime;
-            } else if (currentSortField === 'completeTime') {
-                valueA = a.completeTime || Number.MAX_SAFE_INTEGER;
-                valueB = b.completeTime || Number.MAX_SAFE_INTEGER;
-            }
+            const valueA = a.createTime;
+            const valueB = b.createTime;
 
             return currentSortOrder === 'asc' 
                 ? valueA - valueB 
@@ -676,34 +708,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化排序按钮状态
     updateSortButtons();
 
-    // 添加隐藏已完成项的事件监听器
-    hideCompletedCheckbox.addEventListener('change', (e) => {
-        hideCompleted = e.target.checked;
-        saveSettings();
-        renderTodos();
-    });
-
     // 从本地存储加载设置
     function loadSettings() {
         const settings = JSON.parse(localStorage.getItem('todoSettings')) || {
-            hideCompleted: false,
-            sortField: 'createTime',
+            sortField: 'createTime',  // 现在只有创建时间一种排序
             sortOrder: 'desc'
         };
         
-        hideCompleted = settings.hideCompleted;
-        currentSortField = settings.sortField;
+        currentSortField = 'createTime';  // 强制使用创建时间排序
         currentSortOrder = settings.sortOrder;
         
         // 更新 UI 状态
-        hideCompletedCheckbox.checked = hideCompleted;
         updateSortButtons();
     }
 
     // 保存设置到本地存储
     function saveSettings() {
         const settings = {
-            hideCompleted,
             sortField: currentSortField,
             sortOrder: currentSortOrder
         };
@@ -871,6 +892,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 初始化
-    loadSettings();  // 先加载设置
-    renderTodos();   // 然后渲染列表
+    loadSettings();   // 加载设置
+    renderTodos();    // 渲染列表
 }); 

@@ -924,4 +924,60 @@ body {
 /* 当按钮不可见时的样式 */
 .preview-modal .preview-nav button[style*="visibility: hidden"] {
     display: none;
+}
+
+/* 添加已完成分组相关样式 */
+.completed-group {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.completed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: #666;
+    cursor: pointer;
+}
+
+.completed-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.completed-icon {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.toggle-completed {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+.toggle-completed:hover {
+    color: #333;
+}
+
+.completed-container {
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+}
+
+.completed-container.collapsed {
+    max-height: 0;
+}
+
+/* 修改已完成项目的样式 */
+.completed-container .todo-item {
+    opacity: 0.8;
+    background-color: #f8f8f8;
 } 
