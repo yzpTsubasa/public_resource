@@ -96,10 +96,10 @@ body {
 }
 
 .todo-item img {
-    max-width: 200px;
-    max-height: 150px;
-    margin: 10px 0;
-    border-radius: 5px;
+    max-width: 100px;
+    max-height: 100px;
+    margin: 8px 0;
+    border-radius: 4px;
     cursor: pointer;
     object-fit: cover;
     vertical-align: middle;
@@ -109,6 +109,8 @@ body {
 .todo-item img:hover {
     opacity: 0.9;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02);
+    transition: all 0.2s ease;
 }
 
 /* 图片预览相关样式 */
@@ -543,16 +545,6 @@ body {
 
 .main-content > div {
     margin: 4px 0;
-}
-
-.main-content img {
-    max-width: 200px;
-    max-height: 150px;
-    margin: 10px 0;
-    border-radius: 5px;
-    cursor: pointer;
-    object-fit: cover;
-    vertical-align: middle;
 }
 
 .main-content {
