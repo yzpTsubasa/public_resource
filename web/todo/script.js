@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const todo = {
                 text: todoText,  // 直接使用文本，不进行 HTML 转换
                 completed: false,
+                createTime: Date.now(),
                 id: Date.now()
             };
             
