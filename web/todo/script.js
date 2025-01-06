@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButton = previewModal.querySelector('.preview-close');
     const previewCounter = previewModal.querySelector('.preview-counter');
     const sortButtons = document.querySelectorAll('.sort-btn');
-    const clearCompletedBtn = document.getElementById('clear-completed');
     let currentImages = [];
     let currentImageIndex = 0;
     let currentSortField = 'createTime';
@@ -116,9 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="completed-icon">✓</span>
                     已完成 (${completedTodos.length})
                 </div>
-                <button class="toggle-completed">
-                    <span class="toggle-icon">▼</span>
-                </button>
+                <div class="completed-actions">
+                    <button id="clear-completed" class="clear-btn">清除已完成</button>
+                    <button class="toggle-completed">
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                </div>
             `;
             
             // 创建已完成项目容器
@@ -137,6 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const toggleIcon = completedHeader.querySelector('.toggle-icon');
                 toggleIcon.textContent = completedContainer.classList.contains('collapsed') ? '▶' : '▼';
             });
+            
+            completedHeader.querySelector('.clear-btn').addEventListener('click', clearCompleted);
             
             completedGroup.appendChild(completedHeader);
             completedGroup.appendChild(completedContainer);
@@ -823,9 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
-    // 添加清除按钮的事件监听器
-    clearCompletedBtn.addEventListener('click', clearCompleted);
 
     // 添加更新图片变换的函数
     function updateImageTransform() {
