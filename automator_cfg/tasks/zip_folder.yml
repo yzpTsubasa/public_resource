@@ -1,0 +1,25 @@
+- type: print
+  data:
+    content: "Starting..."
+- type: env_optional
+  data:
+    INPUT_FOLDER:
+
+- type: files
+  data:
+    src: <<INPUT_FOLDER>>/**/*
+    store_key: input_files
+
+- type: storage
+  data:
+    OUTPUT_FILE: <<INPUT_FOLDER>>/../<<INPUT_FOLDER|basename>>.zip
+
+- type: zip
+  data:
+    src: <<INPUT_FOLDER>>/**/*
+    base: <<INPUT_FOLDER>>
+    dst: <<OUTPUT_FILE>>
+
+- type: reveal
+  data:
+    src: <<OUTPUT_FILE>>
