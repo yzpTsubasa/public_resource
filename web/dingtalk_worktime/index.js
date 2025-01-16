@@ -252,7 +252,7 @@ function processDingTalkWorktime(
       "";
     if (realBegTime != begTime) {
       addStatus(
-        `[${date}] ${formatTime(begTime, begTimeRemake)}<span class="text-danger">[${formatTime(realBegTime, begTimeRemake)}]</span>~${formatTime(endTime, endTimeRemake)} ${total}`
+        `[${date}] ${formatTime(begTime, begTimeRemake)}<span class="text-warning">[${formatTime(realBegTime, begTimeRemake)}]</span>~${formatTime(endTime, endTimeRemake)} ${total}`
       );
     } else {
       addStatus(
