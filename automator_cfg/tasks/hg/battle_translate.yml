@@ -1,0 +1,267 @@
+- type: env_optional
+  data:
+    INPUT_FILE: 
+- type: read_cfg
+  data:
+    src: <<INPUT_FILE|dirname>>/resource/assets/cfgjson/s_skill.json
+    store_key: s_skill
+- type: read_cfg
+  data:
+    src: <<INPUT_FILE|dirname>>/resource/assets/cfgjson/s_buff_icon_show.json
+    store_key: s_buff_icon_show
+- type: read_cfg
+  data:
+    src: <<INPUT_FILE|dirname>>/resource/assets/cfgjson/s_buff_info.json
+    store_key: s_buff_info
+- type: read_cfg
+  data:
+    src: <<INPUT_FILE|dirname>>/resource/default.res.json
+    store_key: default_res
+- type: read_cfg
+  data:
+    src: <<INPUT_FILE>>
+    store_key: battle_cfg
+- type: eval
+  data:
+    code: |
+      (() => {
+        const BuffEType = {
+          1: "BUFF➕",
+          2: "BUFF触发",
+          3: "BUFF➖",
+        };
+        const SKILL_EVENT_TYPE = {
+            1: "技能times 开始",
+            2: "技能times 结束",
+            3: "======技能释放 BEG======",
+            4: "======技能释放 END======",
+        };
+        const ATK_RESULT = {
+            1: "闪避",
+            2: "命中",
+            3: "暴击",
+            4: "免疫技能",
+            5: "克制",
+            6: "半克制",
+        };
+        const GetAtkResultDesc = (result) => {
+          const logs = [];
+          for(let bitKey in ATK_RESULT) {
+            const bit = +bitKey;
+            if (result & (1 << bit)) {
+              logs.push(ATK_RESULT[bit])
+            }
+          }
+          return logs.join("+")
+        };
+        const GetValidString = (...str) => {
+          return str.find((str) => str && str != "0")
+        };
+        const GetBuffName = (buffId) => {
+          let buffTypeId = Math.floor(buffId / 1000);
+          const buffInfo = this.s_buff_info.s_buff_info.find((buff) => buff[0] == buffTypeId);
+          if (buffInfo) {
+            buffTypeId = buffInfo[1];
+          }
+          const buffShow = this.s_buff_icon_show.s_buff_icon_show.find((buff) => buff[0] == buffTypeId);
+          return buffShow ? `${GetValidString(buffShow[2], buffShow[4], buffId)} ${GetResPath(buffShow[1])}` : `${buffId}`;
+        };
+        const GetResPath = (resName) => {
+          const resource = this.default_res.resources.find((res) => res.name == resName);
+          if (!resource) return "";
+          return `resource/${resource.url}`;
+        };
+        const GetSkillName = (skillId) => {
+          return this.s_skill.s_skill.find((skill) => skill[0] == skillId)?.[1] || skillId;
+        };
+        const GetRoleName = (data, infoUnit) => {
+          return `[${data._FID}] ${infoUnit.dicBattleCard[data._FID].name}`;
+        };
+        const GetTargetName = (data, infoUnit) => {
+          return `[${data._targetFID}] ${infoUnit.dicBattleCard[data._targetFID].name}`;
+        };
+        this.EventTranslator = {
+          1: (data, infoUnit) => {
+            return `======第 ${data.u8RoundNum} 回合======`;
+          },
+          2: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} 出手`;
+            return title;
+          },
+          3: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} ⚔️ ${GetTargetName(data, infoUnit)}  ${GetSkillName(data.nSkillId)} ${GetAtkResultDesc(data.u8SkillRes)}`;
+            return title;
+          },
+          4: (data, infoUnit) => {
+            return `${GetRoleName(data, infoUnit)} ${BuffEType[data.eType]} ${GetBuffName(data.nBuffId)} (${GetSkillName(data.nSkillID)})`;
+          },
+          5: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "+" : "-"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
+            return title;
+          },
+          6: (data, infoUnit) => {
+            const title = `属性魔量`;
+            return title;
+          },
+          7: (data, infoUnit) => {
+            const title = `位置变更, 备战的出站`;
+            return title;
+          },
+          8: (data, infoUnit) => {
+            const title = `由复活造成属性血量`;
+            return title;
+          },
+          9: (data, infoUnit) => {
+            const title = `援护`;
+            return title;
+          },
+          10: (data, infoUnit) => {
+            const title = `分担造成的血量变化;`;
+            return title;
+          },
+          11: (data, infoUnit) => {
+            const title = `最大血量`;
+            return title;
+          },
+          12: (data, infoUnit) => {
+            const title = `护盾承受伤害数值`;
+            return title;
+          },
+          13: (data, infoUnit) => {
+            const title = `伤害分摊`;
+            return title;
+          },
+          14: (data, infoUnit) => {
+            const title = `属性血量(双倍伤害)`;
+            return title;
+          },
+          15: (data, infoUnit) => {
+            const title = `buff计数`;
+            return title;
+          },
+          16: (data, infoUnit) => {
+            const title = `战场技能`;
+            return title;
+          },
+          18: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} ${GetSkillName(data.nSkillId)} ${SKILL_EVENT_TYPE[data.u8SkillEvent]}`;
+            return title;
+          },
+          19: (data, infoUnit) => {
+            const title = `死亡事件`;
+            return title;
+          },
+          20: (data, infoUnit) => {
+            const title = `位置变更后信息更新结束战报`;
+            return title;
+          },
+          21: (data, infoUnit) => {
+            const title = `二次行动开始`;
+            return title;
+          },
+          22: (data, infoUnit) => {
+            const title = `最大属性蓝量变化`;
+            return title;
+          },
+          23: (data, infoUnit) => {
+            const title = `交换出战阵位`;
+            return title;
+          },
+          24: (data, infoUnit) => {
+            const title = `通知展示特殊事件的表现`;
+            return title;
+          },
+          25: (data, infoUnit) => {
+            const title = `通知展示特殊事件的表现`;
+            return title;
+          },
+          26: (data, infoUnit) => {
+            const title = `PERCastSkill begin end`;
+            return title;
+          },
+          27: (data, infoUnit) => {
+            const title = `进入回合时通知二动资格`;
+            return title;
+          },
+          28: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} ⛔️结束`;
+            return title;
+          },
+          29: (data, infoUnit) => {
+            const title = `${GetRoleName(data, infoUnit)} buff回合 ${data.round} `;
+            return title;
+          },
+          30: (data, infoUnit) => {
+            const title = `召唤单位`;
+            return title;
+          },
+          31: (data, infoUnit) => {
+            const title = `回合结束召唤物死亡`;
+            return title;
+          },
+          32: (data, infoUnit) => {
+            const title = `召唤物跟随死亡`;
+            return title;
+          },
+          33: (data, infoUnit) => {
+            const title = `召唤物刷新死亡`;
+            return title;
+          },
+          34: (data, infoUnit) => {
+            const title = `技能造成消耗属性魔量`;
+            return title;
+          },
+          35: (data, infoUnit) => {
+            const title = `中毒造成的血量变化`;
+            return title;
+          },
+          36: (data, infoUnit) => {
+            const title = `持续伤害造成的血量变化`;
+            return title;
+          },
+          37: (data, infoUnit) => {
+            const title = `逃跑pos列表`;
+            return title;
+          },
+          38: (data, infoUnit) => {
+            const title = `主动消耗血量`;
+            return title;
+          },
+          39: (data, infoUnit) => {
+            const title = `锁血`;
+            return title;
+          },
+          40: (data, infoUnit) => {
+            if (data.uFlagType == 0) {
+              return `技能结束，可以后续属性及BUFF表现`;
+            }
+            const title = `==辅助客户端的表现flag==`;
+            return title;
+          },
+        };
+      })()
+- type: loop
+  data:
+    key: battle_cfg.infoUnits
+    value_mapping: infoUnit
+    commands:
+      - type: eval
+        data:
+          code: |
+            (() => {
+              this.infoUnit.deqData.forEach(data => {
+                  const formattor = this.EventTranslator[data.u8EventType] || ((data, infoUnit) => {
+                    return `未知类型:${data.u8EventType}`;
+                  });
+                  data.$ = formattor(data, this.infoUnit);
+              });
+            })()
+
+- type: write_cfg
+  data:
+    key: battle_cfg
+    type: json_compacted
+    options:
+      sort_keys:
+        - $
+    dst: <<INPUT_FILE>>
