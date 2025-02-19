@@ -208,7 +208,7 @@
             return title;
           },
           34: (data, infoUnit) => {
-            const title = `技能造成消耗属性魔量`;
+            const title = `${GetRoleName(data, infoUnit)} 💙${data.I32ChgVal > 0 ? "+" : "-"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           35: (data, infoUnit) => {
