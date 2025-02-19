@@ -136,9 +136,8 @@
                   - type: eval
                     data:
                       store_key: cur_event_desc
-                      # code: ' [ [a, b] for a, b in zip(storage.get("cur_event_desc"), storage.get("cur_skill_events"))] '
                       code: >
-                        $<<cur_event_desc>>.map((v, i) => [v, $<<cur_skill_events>>[i]])
+                        $<<cur_event_desc>>?.map((v, i) => [v, $<<cur_skill_events>>[i]]) || []
                   - type: list2dict
                     data:
                       key: cur_event_desc
