@@ -59,10 +59,10 @@
         };
         const GetBuffName = (buffId) => {
           let buffTypeId = Math.floor(buffId / 1000);
-          const buffInfo = this.s_buff_info.s_buff_info.find((buff) => buff[0] == buffTypeId);
-          if (buffInfo) {
-            buffTypeId = buffInfo[1];
-          }
+          //const buffInfo = this.s_buff_info.s_buff_info.find((buff) => buff[0] == buffTypeId);
+          //if (buffInfo) {
+          //  buffTypeId = buffInfo[1];
+          //}
           const buffShow = this.s_buff_icon_show.s_buff_icon_show.find((buff) => buff[0] == buffTypeId);
           return buffShow ? `[${GetValidString(buffShow[2], buffShow[4], buffId)}] ${GetResPath(buffShow[1])}` : `[${buffId}]`;
         };
@@ -96,7 +96,7 @@
             return `${GetRoleName(data, infoUnit)} ${BuffEType[data.eType]} ${GetBuffName(data.nBuffId)} ${GetSkillName(data.nSkillID)}`;
           },
           5: (data, infoUnit) => {
-            const title = `${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
+            const title = `血量变化 ${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           6: (data, infoUnit) => {
@@ -212,11 +212,11 @@
             return title;
           },
           35: (data, infoUnit) => {
-            const title = `中毒造成的血量变化`;
+            const title = `中毒造成的血量变化  ${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           36: (data, infoUnit) => {
-            const title = `持续伤害造成的血量变化`;
+            const title = `持续伤害造成的血量变化 ${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           37: (data, infoUnit) => {
