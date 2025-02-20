@@ -26,9 +26,9 @@
     code: |
       (() => {
         const BuffEType = {
-          1: "BUFF➕",
-          2: "BUFF触发",
-          3: "BUFF➖",
+          1: "🌕",
+          2: "触发",
+          3: "🌑",
         };
         const SKILL_EVENT_TYPE = {
             1: "技能times 开始",
@@ -64,7 +64,7 @@
             buffTypeId = buffInfo[1];
           }
           const buffShow = this.s_buff_icon_show.s_buff_icon_show.find((buff) => buff[0] == buffTypeId);
-          return buffShow ? `${GetValidString(buffShow[2], buffShow[4], buffId)} ${GetResPath(buffShow[1])}` : `${buffId}`;
+          return buffShow ? `[${GetValidString(buffShow[2], buffShow[4], buffId)}] ${GetResPath(buffShow[1])}` : `[${buffId}]`;
         };
         const GetResPath = (resName) => {
           const resource = this.default_res.resources.find((res) => res.name == resName);
@@ -72,13 +72,13 @@
           return `resource/${resource.url}`;
         };
         const GetSkillName = (skillId) => {
-          return this.s_skill.s_skill.find((skill) => skill[0] == skillId)?.[1] || skillId;
+          return `[${this.s_skill.s_skill.find((skill) => skill[0] == skillId)?.[1] || skillId}]`;
         };
         const GetRoleName = (data, infoUnit) => {
-          return `[${data._FID}] ${infoUnit.dicBattleCard[data._FID].name}`;
+          return `[${data._FID}]${infoUnit.dicBattleCard[data._FID].name}(${infoUnit.dicBattleCard[data._FID].nCamp == 1 ? "友" : "敌"})`;
         };
         const GetTargetName = (data, infoUnit) => {
-          return `[${data._targetFID}] ${infoUnit.dicBattleCard[data._targetFID].name}`;
+          return `[${data._targetFID}]${infoUnit.dicBattleCard[data._targetFID].name}(${infoUnit.dicBattleCard[data._targetFID].nCamp == 1 ? "友" : "敌"})`;
         };
         this.EventTranslator = {
           1: (data, infoUnit) => {
@@ -93,10 +93,10 @@
             return title;
           },
           4: (data, infoUnit) => {
-            return `${GetRoleName(data, infoUnit)} ${BuffEType[data.eType]} ${GetBuffName(data.nBuffId)} (${GetSkillName(data.nSkillID)})`;
+            return `${GetRoleName(data, infoUnit)} ${BuffEType[data.eType]} ${GetBuffName(data.nBuffId)} ${GetSkillName(data.nSkillID)}`;
           },
           5: (data, infoUnit) => {
-            const title = `${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "+" : "-"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
+            const title = `${GetRoleName(data, infoUnit)} 🩸${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           6: (data, infoUnit) => {
@@ -176,7 +176,7 @@
             return title;
           },
           26: (data, infoUnit) => {
-            const title = `PERCastSkill begin end`;
+            const title = `PERCastSkill ${data.beg ? "BEG" : "END"}`;
             return title;
           },
           27: (data, infoUnit) => {
@@ -208,7 +208,7 @@
             return title;
           },
           34: (data, infoUnit) => {
-            const title = `${GetRoleName(data, infoUnit)} 💙${data.I32ChgVal > 0 ? "+" : "-"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
+            const title = `${GetRoleName(data, infoUnit)} 💧${data.I32ChgVal > 0 ? "⬆️" : "⬇️"}${Math.abs(data.I32ChgVal)} = ${data.u32Val}`;
             return title;
           },
           35: (data, infoUnit) => {
