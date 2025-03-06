@@ -28,6 +28,7 @@ if (localCfg) {
   localCfg = JSON.parse(localCfg);
   Q("#input_dingtalk").value = localCfg.dingtalk;
   Q("#input_worktime_per_day").value = localCfg.worktime_per_day;
+  Q("#input_least_worktime_per_day").value = localCfg.least_worktime_per_day || 4.5;
   Q("#switch_filter").checked = localCfg.filter;
   Q("#input_worktime_begin").value = localCfg.worktime_begin || "09:00";
   Q("#input_alert_forward").value = localCfg.alert_forward || 5;
@@ -40,6 +41,9 @@ Q("#input_dingtalk").addEventListener("input", function () {
   processDingTalkInput();
 });
 Q("#input_worktime_per_day").addEventListener("input", function () {
+  processDingTalkInput();
+});
+Q("#input_least_worktime_per_day").addEventListener("input", function () {
   processDingTalkInput();
 });
 Q("#switch_filter").addEventListener("change", function () {
@@ -83,6 +87,7 @@ function setLocalCfg() {
   var cfg = {
     dingtalk: Q("#input_dingtalk").value,
     worktime_per_day: Q("#input_worktime_per_day").value,
+    least_worktime_per_day: Q("#input_least_worktime_per_day").value,
     filter: Q("#switch_filter").checked,
     worktime_begin: Q("#input_worktime_begin").value,
     alert_forward: Q("#input_alert_forward").value,
@@ -102,6 +107,7 @@ function processDingTalkInput() {
     Q("#input_alert_forward").value,
     Q("#input_date_begin").valueAsDate,
     Q("#input_date_end").valueAsDate,
+    Q("#input_least_worktime_per_day").value,
   );
 }
 
@@ -121,6 +127,7 @@ function processDingTalkWorktime(
   alertForward,
   filterBeginDate,
   filterEndDate,
+  leastWorktimePerDay,
 ) {
   needEndTime = null;
   clearStatus();
@@ -278,13 +285,14 @@ function processDingTalkWorktime(
   const showRecommend = lastDay && !lastDay.endTime;
   Q("#left_wrap").style.display = showRecommend ? "" : "none";
   if (showRecommend) {
-    needEndTime = new Date(lastDay.begTime.getTime() + diff * 60 * 1000);
+    const realDiff = Math.max(diff, leastWorktimePerDay * 60);
+    needEndTime = new Date(lastDay.begTime.getTime() + realDiff * 60 * 1000);
     Q("#label_recommend").innerHTML = `${needEndTime.toLocaleString(undefined, {
       dateStyle: "short",
       timeStyle: "short",
     })}`;
     alerTime = new Date(
-      lastDay.begTime.getTime() + diff * 60 * 1000 - alertForward * 60 * 1000
+      lastDay.begTime.getTime() + realDiff * 60 * 1000 - alertForward * 60 * 1000
     );
     Q("#label_recommend").innerHTML = isSameDay(new Date(), needEndTime) ? needEndTime.toLocaleTimeString() : needEndTime.toLocaleString();
     updateTimer();
