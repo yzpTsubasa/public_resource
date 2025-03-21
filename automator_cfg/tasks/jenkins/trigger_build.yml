@@ -6,7 +6,7 @@
   data:
     JENKINS_USERNAME: # Jenkins用户名
     JENKINS_API_TOKEN: # 从 <<JENKINS_HOME>>/user/<<JENKINS_USERNAME>>/configure 中生成并获取
-    JENKINS_BUILD_URL: # 触发项目构建的URL (必须携带token;多选项如CHOICE的传递需用&符号分割多选值)。如：<<JENKINS_JOB_URL>>/buildWithParameters?token=<<构建token>>&CHOICE=1&CHOICE=2&AUTOMATOR_CFG=XXX&TEST=true&cause=TriggerByAutomator 
+    JENKINS_BUILD_URLS: # 触发项目构建的URL,多个URL以空格分隔。 (必须携带token;多选项如CHOICE的传递需用&符号分割多选值)。如：<<JENKINS_JOB_URL>>/buildWithParameters?token=<<构建token>>&CHOICE=1&CHOICE=2&AUTOMATOR_CFG=XXX&TEST=true&cause=TriggerByAutomator 
 
 - type: storage
   data:
@@ -16,10 +16,16 @@
   data:
     EncodedAutorization: <<Autorization|btoa>>
 
-- type: request
+- type: loop
   data:
-    src: <<JENKINS_BUILD_URL>>
-    options: 
-      method: GET
-      headers:
-        Authorization: Basic <<EncodedAutorization>>
+    src: <<JENKINS_BUILD_URLS>>
+    delimiter: "\\s+"
+    value_mapping: JENKINS_BUILD_URL
+    commands:
+      - type: request
+        data:
+          src: <<JENKINS_BUILD_URL>>
+          options: 
+            method: GET
+            headers:
+              Authorization: Basic <<EncodedAutorization>>
