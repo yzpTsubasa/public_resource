@@ -18,7 +18,7 @@
 
 - type: loop
   data:
-    src: <<JENKINS_BUILD_URLS>>
+    key: JENKINS_BUILD_URLS
     delimiter: "\\s+"
     value_mapping: JENKINS_BUILD_URL
     commands:
