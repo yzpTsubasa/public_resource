@@ -6,8 +6,7 @@
   data:
     JENKINS_USERNAME: # Jenkins用户名
     JENKINS_API_TOKEN: # 从 <<JENKINS_HOME>>/user/<<JENKINS_USERNAME>>/configure 中生成并获取
-    JENKINS_JOB_URL: # 项目的URL
-    JENKINS_BUILD_PARAMETERS: # 自定义参数(必须携带token;多选项如CHOICE的传递需用&符号分割多选值)。如：token=<<构建token>>&CHOICE=1&CHOICE=2&AUTOMATOR_CFG=XXX&TEST=true&cause=TriggerByAutomator 
+    JENKINS_BUILD_URL: # 触发项目构建的URL (必须携带token;多选项如CHOICE的传递需用&符号分割多选值)。如：<<JENKINS_JOB_URL>>/buildWithParameters?token=<<构建token>>&CHOICE=1&CHOICE=2&AUTOMATOR_CFG=XXX&TEST=true&cause=TriggerByAutomator 
 
 - type: storage
   data:
@@ -19,7 +18,7 @@
 
 - type: request
   data:
-    src: <<JENKINS_JOB_URL>>/buildWithParameters?<<JENKINS_BUILD_PARAMETERS>>
+    src: <<JENKINS_BUILD_URL>>
     options: 
       method: GET
       headers:
