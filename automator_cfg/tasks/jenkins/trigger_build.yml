@@ -1,0 +1,27 @@
+- type: print
+  data:
+    content: "Starting..."
+
+- type: env_optional
+  data:
+    JENKINS_USERNAME: # Jenkins用户名
+    JENKINS_API_TOKEN: # 从 <<JENKINS_HOME>>/user/<<JENKINS_USERNAME>>/configure 中生成并获取
+    JENKINS_JOB_URL: # 项目的URL
+    JENKINS_BUILD_TOKEN: # 项目的构建触发器中配置的token
+    JENKINS_BUILD_PARAMETERS: # 自定义参数(必须以&开头,多选项如CHOICE的传递需用&符号分割多选值)。如：&CHOICE=1&CHOICE=2&AUTOMATOR_CFG=XXX&TEST=true&cause=TriggerByAutomator 
+
+- type: storage
+  data:
+    Autorization: <<JENKINS_USERNAME>>:<<JENKINS_API_TOKEN>>
+
+- type: storage
+  data:
+    EncodedAutorization: <<Autorization|btoa>>
+
+- type: request
+  data:
+    src: <<JENKINS_JOB_URL>>/buildWithParameters?token=<<JENKINS_BUILD_TOKEN>><<JENKINS_BUILD_PARAMETERS>>
+    options: 
+      method: GET
+      headers:
+        Authorization: Basic <<EncodedAutorization>>
